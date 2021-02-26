@@ -1,10 +1,3 @@
-<style>
-td,th {border: 1px solid #ccc;text-align: center;}
-td {font-size: 14px;color: #7c8286;}
-tr:nth-child(2n+2){background: #F8F8F8;}
-th {background: #00A0EA;color: #ffffff;font-size: 16px;}
-tr {height: 50px;}
-</style>
 
 ## 1.概述
 新篇章，新起点。涂图视频剪辑 SDK（下文简称剪辑 SDK）经历了数月的研发和测试。现正式发布。
