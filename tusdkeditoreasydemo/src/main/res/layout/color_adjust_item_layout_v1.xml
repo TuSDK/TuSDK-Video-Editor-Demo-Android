@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_marginBottom="4dp"
+    android:background="@color/lsq_editor_panel_bg">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/lsq_adjust_item_title"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="白平衡"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <Button
+        android:id="@+id/lsq_adjust_item_move_down"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="6dp"
+        android:gravity="center"
+        android:text="下移"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_adjust_item_move_up" />
+
+    <Button
+        android:id="@+id/lsq_adjust_item_move_up"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:text="上移"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toTopOf="@id/lsq_adjust_item_move_down"
+        app:layout_constraintRight_toRightOf="@id/lsq_adjust_item_move_down"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/lsq_params_value"
+        android:layout_width="34dp"
+        android:layout_height="0dp"
+        android:layout_marginRight="10dp"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/lsq_color_adjust_params_bar"
+        app:layout_constraintLeft_toRightOf="@id/lsq_color_adjust_params_bar"
+        app:layout_constraintRight_toLeftOf="@id/lsq_adjust_item_move_up"
+        app:layout_constraintTop_toTopOf="@+id/lsq_color_adjust_params_bar" />
+
+    <TextView
+        android:id="@+id/lsq_adjust_params_title"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="4dp"
+        android:gravity="center"
+        android:text="色温"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_adjust_item_title"
+        app:layout_constraintLeft_toRightOf="@id/lsq_adjust_item_title"
+        app:layout_constraintTop_toTopOf="@id/lsq_adjust_item_title" />
+
+    <SeekBar
+        android:id="@+id/lsq_color_adjust_params_bar"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:maxHeight="4dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:progressDrawable="@drawable/lsq_model_seekbar_bg"
+        android:thumb="@drawable/lsq_model_seekbar_thumb"
+        android:thumbOffset="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/lsq_adjust_params_title"
+        app:layout_constraintRight_toLeftOf="@id/lsq_params_value"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

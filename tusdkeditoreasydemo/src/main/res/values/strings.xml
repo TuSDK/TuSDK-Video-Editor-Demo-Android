@@ -1,0 +1,275 @@
+<resources>
+    <string name="app_name">涂图视频剪辑</string>
+
+    <string name="lsq_function_movie_cuter">视频时间裁剪</string>
+
+    <string name="lsq_function_video_stitcing">多视频拼接</string>
+    <string name="lsq_function_video_segmentation">视频分割</string>
+    <string name="lsq_function_video_image_stitcing">视频图片拼接</string>
+    <string name="lsq_function_image_stitcing">图片合成视频</string>
+
+    <string name="lsq_function_video_audio_mix">音视频混合</string>
+    <string name="lsq_function_audio_mix">多音轨混合</string>
+
+    <string name="lsq_function_video_filter_effect">滤镜特效</string>
+    <string name="lsq_function_video_mv_effect">MV特效</string>
+    <string name="lsq_function_video_scene_effect">场景特效</string>
+    <string name="lsq_function_video_reverse_effect">视频倒放</string>
+    <string name="lsq_function_video_slow_effect">视频慢动作</string>
+    <string name="lsq_function_video_repeat_effect">视频段反复</string>
+    <string name="lsq_function_video_transitions_effect">转场特效</string>
+    <string name="lsq_function_video_ratio">比例裁剪</string>
+    <string name="lsq_function_particle_effect">魔法效果</string>
+    <string name="lsq_function_picture_in_picture">画中画</string>
+    <string name="lsq_function_video_with_image">视频和图片混合</string>
+    <string name="lsq_function_video_with_video">视频和视频混合</string>
+    <string name="lsq_function_image_with_image">图片和图片混合</string>
+    <string name="lsq_function_image_with_video">图片和视频混合</string>
+    <string name="lsq_function_text">文字特效</string>
+    <string name="lsq_function_cover">封面提取</string>
+    <string name="lsq_function_speed">视频线性变速</string>
+    <string name="lsq_function_color_adjust">视频颜色调整</string>
+    <string name="lsq_function_crop">视频画面裁剪</string>
+    <string name="lsq_function_transform">视频变换</string>
+    <string name="lsq_function_canvas_background">视频背景</string>
+    <string name="lsq_function_audio_patch">音频变声</string>
+    <string name="lsq_function_draft_list">草稿箱</string>
+
+    <!-- 混合模式 -->
+    <string name="lsq_filter_normal">正常</string>
+    <string name="lsq_filter_add">相加</string>
+    <string name="lsq_filter_substract">减去</string>
+    <string name="lsq_filter_negation">反色</string>
+    <string name="lsq_filter_average">均值</string>
+    <string name="lsq_filter_multiply">正片叠底</string>
+    <string name="lsq_filter_difference">差值</string>
+    <string name="lsq_filter_screen">滤色</string>
+    <string name="lsq_filter_softlight">柔光</string>
+    <string name="lsq_filter_hardlight">强光</string>
+    <string name="lsq_filter_lighten">变亮</string>
+    <string name="lsq_filter_darken">变暗</string>
+    <string name="lsq_filter_reflect">反射</string>
+    <string name="lsq_filter_exclusion">排除</string>
+
+
+
+    <!-- 转场 -->
+    <string name="lsq_filter_fade">淡化</string>
+    <string name="lsq_filter_fadecolor">颜色淡化</string>
+    <string name="lsq_filter_wipeleft">向左擦除</string>
+    <string name="lsq_filter_wiperight">向右擦除</string>
+    <string name="lsq_filter_wipeup">向上擦除</string>
+    <string name="lsq_filter_wipedown">向下擦除</string>
+    <string name="lsq_filter_pullleft">向左滑动</string>
+    <string name="lsq_filter_pullright">向右滑动</string>
+    <string name="lsq_filter_pullup">向上滑动</string>
+    <string name="lsq_filter_pulldown">向下滑动</string>
+    <string name="lsq_filter_swap">交换</string>
+    <string name="lsq_filter_doorway">开幕</string>
+    <string name="lsq_filter_crosszoom">交叉缩放</string>
+    <string name="lsq_filter_crosswarp">交叉扭曲</string>
+    <string name="lsq_filter_pinwheel">风车</string>
+    <string name="lsq_filter_radial">雷达</string>
+    <string name="lsq_filter_simplezoom">放大</string>
+    <string name="lsq_filter_dreamyzoom">梦境</string>
+    <string name="lsq_filter_perlin">褪去</string>
+    <string name="lsq_filter_circle">圆圈</string>
+    <string name="lsq_filter_circleclose">圆圈关闭</string>
+    <string name="lsq_filter_circleopen">圆圈打开</string>
+    <string name="lsq_filter_linearblur">线性模糊</string>
+    <string name="lsq_filter_heart">爱心</string>
+
+    
+    <!-- Adjust -->
+    <string name="lsq_adjust_white_balance">白平衡</string>
+    <string name="lsq_adjust_color_temperature">色温</string>
+    <string name="lsq_adjust_color_tone">色彩</string>
+    <string name="lsq_adjust_highlight_shadow">高亮阴影</string>
+    <string name="lsq_adjust_highlight">高亮</string>
+    <string name="lsq_adjust_shadow">阴影</string>
+    <string name="lsq_adjust_sharpen">锐化</string>
+    <string name="lsq_adjust_brightness">亮度</string>
+    <string name="lsq_adjust_contrast">对比度</string>
+    <string name="lsq_adjust_saturation">饱和度</string>
+    <string name="lsq_adjust_exposure">曝光度</string>
+    <string name="lsq_adjust_mixied">强度</string>
+
+    <!-- Ratio -->
+    <string name="lsq_next">下一步</string>
+
+    <string name="lsq_trim_16_9">16:9</string>
+    <string name="lsq_trim_3_2">3:2</string>
+    <string name="lsq_trim_4_3">4:3</string>
+    <string name="lsq_trim_1_1">1:1</string>
+    <string name="lsq_trim_3_4">3:4</string>
+    <string name="lsq_trim_2_3">2:3</string>
+    <string name="lsq_trim_9_16">9:16</string>
+
+    <string name="lsq_normal">正常</string>
+    <string name="lsq_italic">斜体</string>
+
+
+
+    <!-- MV -->
+    <string name="lsq_mv_小猫玩球">猫球球</string>
+    <string name="lsq_mv_无语乌鸦">无语乌鸦</string>
+    <string name="lsq_mv_怪兽">怪兽</string>
+    <string name="lsq_mv_none">无效果</string>
+    <string name="lsq_mv_汤圆">汤圆</string>
+    <string name="lsq_mv_儿童节">儿童节</string>
+
+    <string name="lsq_mv_圆形遮罩">圆形遮罩</string>
+    <string name="lsq_mv_老电影">老电影</string>
+    <string name="lsq_mv_流光">流光</string>
+
+    <!-- 场景特效 -->
+    <string name="lsq_filter_LiveShake01">抖动</string>
+    <string name="lsq_filter_LiveMegrim01">幻觉</string>
+    <string name="lsq_filter_EdgeMagic01">魔法</string>
+    <string name="lsq_filter_LiveFancy01_1">70s</string>
+    <string name="lsq_filter_LiveSoulOut01">灵魂出窍</string>
+    <string name="lsq_filter_LiveSignal01">信号</string>
+    <string name="lsq_filter_LiveLightning01">闪电</string>
+    <string name="lsq_filter_LiveXRay01">X光</string>
+    <string name="lsq_filter_LiveHeartbeat01">心跳</string>
+    <string name="lsq_filter_LiveMirrorImage01">镜像</string>
+    <string name="lsq_filter_LiveSlosh01">晃动</string>
+    <string name="lsq_filter_LiveOldTV01">旧电视</string>
+
+    <!-- 魔法特效 Code 名称 -->
+    <string name="lsq_filter_snow01">雪花</string>
+    <string name="lsq_filter_Love">甜心</string>
+    <string name="lsq_filter_Bubbles">泡泡</string>
+    <string name="lsq_filter_Music">音符</string>
+    <string name="lsq_filter_Star">星星</string>
+    <string name="lsq_filter_Surprise">惊喜</string>
+    <string name="lsq_filter_Flower">花瓣</string>
+    <string name="lsq_filter_Magic">鬼火</string>
+    <string name="lsq_filter_Money">金币</string>
+    <string name="lsq_filter_Burning">燃烧</string>
+    <string name="lsq_filter_Fireball">火球</string>
+
+    <string name="lsq_magic_size">大小</string>
+    <string name="lsq_magic_color">颜色</string>
+
+    <!--文字特效-->
+    <string name="lsq_edit_text_title">文字</string>
+    <string name="lsq_style_default_edit_icon_text_add">添加</string>
+    <string name="lsq_style_default_edit_icon_text_color">颜色</string>
+    <string name="lsq_style_default_edit_icon_text_font">样式</string>
+    <string name="lsq_edit_text_sticker_default_text">点击输入内容</string>
+    <string name="lsq_text_sticker_font_color">字体</string>
+    <string name="lsq_text_sticker_background_color">背景</string>
+    <string name="lsq_text_sticker_stroke_color">线框</string>
+    <string name="lsq_text_sticker_text_color">#FFFFFF</string>
+    <string name="lsq_text_sticker_text_shadow_color">#000000</string>
+    <string name="lsq_text_style_right_to_left">从右到左</string>
+    <string name="lsq_text_style_left_to_right">从左到右</string>
+    <string name="lsq_text_style_underline">下划线</string>
+    <string name="lsq_text_style_alignleft">左对齐</string>
+    <string name="lsq_text_style_alignright">右对齐</string>
+    <string name="lsq_text_style_aligncenter">居中</string>
+
+    <string name="lsq_editor_text_add">新增</string>
+    <string name="lsq_editor_text_color">颜色</string>
+    <string name="lsq_editor_text_transparency">不透明度</string>
+    <string name="lsq_editor_text_stroke">描边</string>
+    <string name="lsq_editor_text_background">背景</string>
+    <string name="lsq_editor_text_space">间距</string>
+    <string name="lsq_editor_text_align">对齐</string>
+    <string name="lsq_editor_text_array">排列</string>
+    <string name="lsq_editor_text_style">样式</string>
+    <string name="lsq_editor_text_size">字号</string>
+    <string name="lsq_editor_text_font">字体</string>
+    <string name="lsq_editor_text_blend">混合模式</string>
+
+
+    <!--    4.0.0新滤镜    -->
+
+    <string name="lsq_filter_Sharp_Orange_1">橙</string>
+    <string name="lsq_filter_Sharp_Black_1">黑</string>
+    <string name="lsq_filter_Sharp_History_1">历史</string>
+    <string name="lsq_filter_Sharp_Red_1">红</string>
+    <string name="lsq_filter_Sharp_Neon_1">霓虹</string>
+    <string name="lsq_filter_Sharp_Ash_1">茶灰</string>
+    <string name="lsq_filter_Sharp_Pink_1">粉</string>
+    <string name="lsq_filter_Sharp_Past_1">往事</string>
+    <string name="lsq_filter_Sharp_Otimes_1">旧时代</string>
+    <string name="lsq_filter_Sharp_Quiet_1">幽静</string>
+    <string name="lsq_filter_Sharp_Mottled_1">斑驳</string>
+    <string name="lsq_filter_Sharp_Messy_1">杂乱</string>
+    <string name="lsq_filter_Sharp_Imprint_1">印记</string>
+    <string name="lsq_filter_Sharp_Nostalgia_1">怀旧</string>
+    <string name="lsq_filter_Sharp_Dream_1">梦幻</string>
+    <string name="lsq_filter_Sharp_Contrast_1">反差</string>
+    <string name="lsq_filter_Sharp_Dark_1">暗夜</string>
+
+
+    <string name="lsq_filter_Scenery_SNight_1">静夜</string>
+    <string name="lsq_filter_Scenery_Flower_1">花海</string>
+    <string name="lsq_filter_Scenery_Rain_1">冷雨</string>
+    <string name="lsq_filter_Scenery_Fresh_1">清新</string>
+    <string name="lsq_filter_Scenery_Izu_1">伊豆</string>
+    <string name="lsq_filter_Scenery_Innocence_1">童真</string>
+    <string name="lsq_filter_Scenery_Tale_1">童话</string>
+    <string name="lsq_filter_Scenery_Picnic_1">野餐</string>
+    <string name="lsq_filter_Scenery_Blue_1">净蓝</string>
+    <string name="lsq_filter_Scenery_Birch_1">白桦</string>
+    <string name="lsq_filter_Scenery_Afternoon_1">午后</string>
+    <string name="lsq_filter_Scenery_City_1">城市</string>
+    <string name="lsq_filter_Scenery_Film_1">电影</string>
+    <string name="lsq_filter_Scenery_Silent_1">寂静</string>
+    <string name="lsq_filter_Scenery_Lautumn_1">晚秋</string>
+    <string name="lsq_filter_Scenery_Sunrise_1">日光</string>
+    <string name="lsq_filter_Scenery_Sunset_1">晚霞</string>
+    <string name="lsq_filter_Scenery_Grace_1">优雅</string>
+    <string name="lsq_filter_Scenery_Withered_1">凋零</string>
+
+
+    <string name="lsq_filter_Food_Delicious_1">美味</string>
+    <string name="lsq_filter_Food_Lemon_1">柠檬</string>
+    <string name="lsq_filter_Food_Light_1">淡酒</string>
+    <string name="lsq_filter_Food_Whisky_1">威士忌</string>
+    <string name="lsq_filter_Food_Caramel_1">焦糖</string>
+    <string name="lsq_filter_Food_Peach_1">蜜桃</string>
+    <string name="lsq_filter_Food_Honey_1">蜜糖</string>
+    <string name="lsq_filter_Food_Mangosteen_1">山竹</string>
+    <string name="lsq_filter_Food_Lime_1">青柠</string>
+
+
+    <string name="lsq_filter_Portrait_Natural_1">自然</string>
+    <string name="lsq_filter_Portrait_Pale_1">白皙</string>
+    <string name="lsq_filter_Portrait_Clear_1">清澈</string>
+    <string name="lsq_filter_Portrait_Moisten_1">水润</string>
+    <string name="lsq_filter_Portrait_Spring_1">春天</string>
+    <string name="lsq_filter_Portrait_Bellflower_1">桔梗</string>
+    <string name="lsq_filter_Portrait_Cherry_1">樱桃</string>
+    <string name="lsq_filter_Portrait_First_1">初见</string>
+    <string name="lsq_filter_Portrait_Pure_1">清纯</string>
+    <string name="lsq_filter_Portrait_Bright_1">光洁</string>
+    <string name="lsq_filter_Portrait_Retro_1">复古</string>
+    <string name="lsq_filter_Portrait_Soda_1">苏打</string>
+    <string name="lsq_filter_Portrait_Indifference_1">冷淡</string>
+    <string name="lsq_filter_Portrait_Rosy_1">粉嫩</string>
+    <string name="lsq_filter_Portrait_Icream_1">冰淇淋</string>
+    <string name="lsq_filter_Portrait_Ruddy_1">红润</string>
+    <string name="lsq_filter_Portrait_Dusk_1">黄昏</string>
+    <string name="lsq_filter_Portrait_Cream_1">奶油</string>
+    <string name="lsq_filter_Portrait_Texture_1">质感</string>
+    <string name="lsq_filter_Portrait_Dawn_1">晨光</string>
+    <string name="lsq_filter_Portrait_Milk_1">牛奶</string>
+    <string name="lsq_filter_Portrait_Candy_1">糖果</string>
+    <string name="lsq_filter_Portrait_Warm_1">温暖</string>
+    <string name="lsq_filter_Portrait_Sweet_1">甜系</string>
+    <string name="lsq_filter_Portrait_Fog_1">水雾</string>
+    <string name="lsq_filter_Portrait_Desserts_1">甜点</string>
+
+
+    <!--    变声-->
+    <string name="lsq_audio">变声</string>
+    <string name="lsq_monster">怪兽</string>
+    <string name="lsq_uncle">大叔</string>
+    <string name="lsq_girl">女生</string>
+    <string name="lsq_lolita">萝莉</string>
+
+</resources>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- color -->
+    <color name="lsq_color_white">#ffffff</color>
+    <color name="lsq_color_black">#000000</color>
+    <color name="lsq_color_transparent">#E6000000</color>
+
+
+    <!-- alpha -->
+    <color name="lsq_alpha_black_66">#66000000</color>
+
+    <color name="lsq_alpha_black_7f">#7F000000</color>
+
+    <color name="lsq_alpha_white_99">#99ffffff</color>
+
+
+    <!-- actionsheet -->
+    <color name="lsq_actionsheet_title_color">#666666</color>
+
+
+    <color name="lsq_background_entry_default">#FFFFFF</color>
+
+    <color name="lsq_color_api_gray">#2B2B2B</color>
+
+    <color name = "transparent">#00000000</color>
+
+    <color name="lsq_icon_set_color">#222222</color>
+    <color name="lsq_seek_value_color">#4085FD</color>
+
+
+    <color name="lsq_color_red">#F40A0A</color>
+
+    <!-- seekbar -->
+    <color name="lsq_seekbar_drag_color">#FFFFFF</color>
+    <color name="lsq_seekbar_view_color">#20FFFFFF</color>
+    <color name="lsq_filter_config_highlight">#FFFFFF</color>
+
+    <color name="lsq_scence_effect_color_title">#999999</color>
+
+    <color name="lsq_editor_panel_bg">#333333</color>
+
+    <color name="lsq_widget_speedbar_bg">#77555555</color>
+    <color name="lsq_widget_speedbar_button_bg">#ffcc00</color>
+
+    <color name="lsq_editor_cut_select_font_color">#ffcc00</color>
+
+    <color name="lsq_editor_cut_select_button_background">#80333333</color>
+
+</resources>

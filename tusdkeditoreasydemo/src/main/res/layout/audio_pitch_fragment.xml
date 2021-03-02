@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lsq_editor_panel_bg">
+
+
+    <!--速度控制-->
+    <LinearLayout
+        android:id="@+id/lsq_editor_audio_record_type_bar"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/tusdk_edite_cut_speedbar_bg"
+        android:orientation="horizontal"
+        android:weightSum="5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:tag="0"
+            android:text="@string/lsq_monster"
+            android:textAlignment="center"
+            android:textColor="@color/lsq_color_white"
+            android:textSize="13sp" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:tag="1"
+            android:text="@string/lsq_uncle"
+            android:textColor="@color/lsq_color_white"
+            android:textSize="13sp" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/tusdk_edite_cut_speed_button_bg"
+            android:tag="2"
+            android:text="@string/lsq_normal"
+            android:textColor="@color/lsq_editor_cut_select_font_color"
+            android:textSize="13sp" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:tag="3"
+            android:text="@string/lsq_girl"
+            android:textColor="@color/lsq_color_white"
+            android:textSize="13sp" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:tag="4"
+            android:text="@string/lsq_lolita"
+            android:textColor="@color/lsq_color_white"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

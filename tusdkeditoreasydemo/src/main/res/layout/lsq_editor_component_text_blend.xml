@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!--返回按钮-->
+    <ImageView
+        android:id="@+id/lsq_editor_component_text_font_back"
+        android:layout_width="76dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:src="@drawable/edit_ic_return"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:layout_marginEnd="20dp"
+        android:id="@+id/lsq_blend_list_panel"
+        android:layout_width="280dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="20dp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_editor_component_text_font_back"
+        app:layout_constraintLeft_toRightOf="@id/lsq_editor_component_text_font_back"
+        app:layout_constraintTop_toTopOf="@id/lsq_editor_component_text_font_back">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_marginEnd="20dp"
+            android:id="@+id/lsq_blend_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/lsq_blend_mix_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp"
+        android:text="混合强度"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_blend_list_panel" />
+
+    <SeekBar
+        android:id="@+id/lsq_blend_mix_bar"
+        android:layout_width="300dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:max="100"
+        android:progress="100"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_blend_mix_title"
+        app:layout_constraintLeft_toRightOf="@id/lsq_blend_mix_title"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lsq_blend_mix_title" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

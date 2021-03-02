@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lsq_editor_panel_bg">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        tools:layout_editor_absoluteX="-93dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/lsq_editor_current_state"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lsq_crop_top_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:text="裁剪区间\n(上-下)"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lsq_editor_current_state" />
+
+            <cn.bar.DoubleHeadedDragonBar
+                android:id="@+id/lsq_crop_top_bottom_bar"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                android:layout_marginBottom="14dp"
+                app:bg_color="@color/lsq_color_api_gray"
+                app:button_height="30dp"
+                app:button_img="@mipmap/sel_ic"
+                app:button_width="30dp"
+                app:layout_constraintBottom_toBottomOf="@id/lsq_crop_top_bottom"
+                app:layout_constraintLeft_toRightOf="@id/lsq_crop_top_bottom"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/lsq_crop_top_bottom"
+                app:seek_height="4dp"
+                app:value_color="@color/lsq_seek_value_color" />
+
+
+            <TextView
+                android:id="@+id/lsq_crop_left_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:text="裁剪区域\n(左-右)"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lsq_crop_top_bottom" />
+
+            <cn.bar.DoubleHeadedDragonBar
+                android:id="@+id/lsq_crop_left_right_bar"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                android:layout_marginBottom="14dp"
+                app:bg_color="@color/lsq_color_api_gray"
+                app:button_height="30dp"
+                app:button_img="@mipmap/sel_ic"
+                app:button_width="30dp"
+                app:layout_constraintBottom_toBottomOf="@id/lsq_crop_left_right"
+                app:layout_constraintLeft_toRightOf="@id/lsq_crop_left_right"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/lsq_crop_left_right"
+                app:seek_height="4dp"
+                app:value_color="@color/lsq_seek_value_color" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
