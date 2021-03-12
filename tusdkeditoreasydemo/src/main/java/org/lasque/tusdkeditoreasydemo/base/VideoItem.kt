@@ -95,6 +95,8 @@ public class VideoItem(val path: String, val id: Long, val videoClip: Clip, val 
         fun copy(editor: VideoEditor,item : VideoItem) : VideoItem{
             val videoClip = Clip(editor.context,item.mVideoClip.model)
 
+
+
             val audioClip = Clip(editor.context,item.mAudioClip.model)
 
             if (!videoClip.activate()) {

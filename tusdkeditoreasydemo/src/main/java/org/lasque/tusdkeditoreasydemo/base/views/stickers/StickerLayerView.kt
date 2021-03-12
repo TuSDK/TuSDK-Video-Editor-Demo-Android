@@ -422,8 +422,14 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
             removeView(layer0)
             removeView(layer1)
 
-            addView(layer0,index1)
-            addView(layer1,index0)
+            if (index0 < index1){
+                addView(layer1,index0)
+                addView(layer0,index1)
+            } else {
+                addView(layer0,index1)
+                addView(layer1,index0)
+            }
+
         }
         val id = layer0!!.mCurrentLayerId
         layer0!!.mCurrentLayerId = layer1!!.mCurrentLayerId

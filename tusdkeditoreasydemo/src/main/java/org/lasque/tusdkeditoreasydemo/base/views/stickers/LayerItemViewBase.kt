@@ -38,6 +38,7 @@ import org.lasque.tusdkpulse.core.view.TuSdkViewHelper
 import org.lasque.tusdkeditoreasydemo.base.views.TuSdkImageButton
 import org.lasque.tusdkeditoreasydemo.base.EditorPlayerContext
 import java.util.concurrent.ExecutorService
+import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
@@ -314,6 +315,8 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
             mClipDuration = layer.streamInfo.duration
             mLayerStartPos = layerConfig.getIntNumber(Layer.CONFIG_START_POS)
             mLayerEndPos = mLayerStartPos + mClipDuration
+
+            if (mMaxLayerDuration == 0L) mMaxLayerDuration = mLayerStartPos + layer!!.streamInfo.duration
 
             if (mCurrentLayerType == LayerType.Text) return@execute
             mScale = resizeHolder.pzr_zoom.toFloat()
@@ -658,9 +661,10 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
         val streamInfo = (mEditor!!.videoComposition().streamInfo as VideoStreamInfo)
         val hp = streamInfo.width / mParentFrame.width().toFloat()
         val lastSize = mDefaultViewSize.copy()
+        TLog.e("current size w : ${posProperty.width} h : ${posProperty.height} scale ${mScale}")
         context.runOnUiThread {
-            val width = (posProperty.width / hp).toInt() + ContextUtils.dip2px(context,26f)
-            val height = (posProperty.height / hp).toInt() + ContextUtils.dip2px(context,26f)
+            val width = (posProperty.width.absoluteValue / hp).toInt() + ContextUtils.dip2px(context,26f)
+            val height = (posProperty.height.absoluteValue / hp).toInt() + ContextUtils.dip2px(context,26f)
             mDefaultViewSize = TuSdkSize(width,height)
             val scaleSize = mDefaultViewSize.copy()
             val pX = posProperty.posX * mParentFrame.width()

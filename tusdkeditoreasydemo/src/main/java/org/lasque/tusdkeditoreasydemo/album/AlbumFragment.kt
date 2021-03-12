@@ -17,9 +17,17 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import com.tusdk.pulse.MediaInspector
+import com.tusdk.pulse.Producer
+import com.tusdk.pulse.Transcoder
 import kotlinx.android.synthetic.main.movie_album_fragment.*
+import kotlinx.android.synthetic.main.movie_album_fragment.lsq_editor_cut_load
+import kotlinx.android.synthetic.main.movie_album_fragment.lsq_editor_cut_load_parogress
+import kotlinx.android.synthetic.main.time_fragment.*
+import org.jetbrains.anko.support.v4.runOnUiThread
 import org.jetbrains.anko.support.v4.toast
 import org.lasque.tusdkpulse.core.utils.sqllite.ImageSqlHelper
 import org.lasque.tusdkpulse.core.utils.sqllite.ImageSqlInfo
@@ -27,8 +35,17 @@ import org.lasque.tusdkpulse.impl.view.widget.TuProgressHub
 import org.lasque.tusdkeditoreasydemo.R
 import org.lasque.tusdkeditoreasydemo.base.BaseActivity.Companion.ALBUM_RESULT_CODE
 import org.lasque.tusdkeditoreasydemo.utils.MD5Util
+import org.lasque.tusdkpulse.core.TuSdk
+import org.lasque.tusdkpulse.core.utils.FileHelper
+import org.lasque.tusdkpulse.core.utils.StringHelper
+import org.lasque.tusdkpulse.core.utils.TLog
 import org.lasque.tusdkpulse.core.utils.ThreadHelper
+import org.lasque.tusdkpulse.core.utils.image.BitmapHelper
+import java.io.File
 import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 import kotlin.collections.ArrayList
 
 class AlbumFragment : Fragment(), LoadTaskDelegate {
@@ -48,6 +65,10 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
     private var mMaxSize = 1
 
     private var mMinSize = -1
+
+    private var mPool: ExecutorService = Executors.newSingleThreadExecutor()
+
+    private val transcoderSemaphore: Semaphore = Semaphore(0)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.movie_album_fragment, container, false)
@@ -118,17 +139,57 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
                 return
             }
         }
-        val pathList = ArrayList<String>()
-        for (info in mSelectList) {
-            pathList.add(info.path)
-        }
-        val intent = Intent()
-        val bundle = Bundle()
-        bundle.putSerializable("select",mSelectList)
-        intent.putExtra("select",bundle)
+
+        mPool.execute {
+            val pathList = ArrayList<String>()
+            for (info in mSelectList) {
+                if (info.type == AlbumItemType.Video){
+                    val path = info.path
+                    val mediaInfo = MediaInspector.shared().inspect(path)
+                    for (index in mediaInfo.streams){
+                        if (index is MediaInspector.MediaInfo.Video){
+                            // 目前版本暂时开始视频转码判断
+                            if (!index.directReverse){
+                                runOnUiThread {
+                                    toast("视频关键帧过少,需要进行转码")
+                                }
+                                info.path = videoTranscoder(path)
+                            } else {
+                                val toPath = getOutputTempFilePath()
+                                FileHelper.copyFile(File(path),toPath)
+                                info.path = toPath.absolutePath
+                            }
+                            // 如需关闭视频转码 打开下面的代码,注释上方的代码
+//
+//                            val toPath = getOutputTempFilePath()
+//                            FileHelper.copyFile(File(path),toPath)
+//                            info.path = toPath.absolutePath
+                        }
+                    }
+                } else {
+                    val path = info.path
+                    val suffixIndex = path.lastIndexOf(".")
+                    val suffix = path.substring(suffixIndex+1,path.length)
+                    val toPath = getTempImagePath(suffix)
+                    FileHelper.copyFile(File(path),toPath)
+                    info.path = toPath.absolutePath
+                }
+
+                pathList.add(info.path)
+            }
+            runOnUiThread {
+                val intent = Intent()
+                val bundle = Bundle()
+
+                bundle.putSerializable("select",mSelectList)
+                intent.putExtra("select",bundle)
 //        intent.putStringArrayListExtra("select", pathList)
-        activity?.setResult(ALBUM_RESULT_CODE, intent)
-        activity?.finish()
+                activity?.setResult(ALBUM_RESULT_CODE, intent)
+                activity?.finish()
+            }
+        }
+
+
     }
 
 
@@ -159,6 +220,60 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
 
     override fun onLoading() {
         TuProgressHub.showToast(activity, "数据加载中...")
+    }
+
+    /** 获取临时文件路径  */
+    protected fun getOutputTempFilePath(): File {
+        return File(TuSdk.getAppTempPath(), String.format("lsq_%s.mp4", StringHelper.timeStampString()))
+    }
+
+    protected fun getTempImagePath(suffix : String) : File{
+        return File(TuSdk.getAppTempPath(), String.format("lsq_%s.%s", StringHelper.timeStampString(),suffix))
+    }
+
+    private fun videoTranscoder(inputPath: String): String {
+        val outputPath = getOutputTempFilePath().path
+        val transcoder = Transcoder()
+        transcoder.setListener(object : Producer.Listener {
+            override fun onEvent(state: Producer.State?, ts: Long) {
+                if (state == Producer.State.kWRITING) {
+                    runOnUiThread {
+                        lsq_editor_cut_load.setVisibility(View.VISIBLE)
+                        lsq_editor_cut_load_parogress.setValue((ts / transcoder.duration.toFloat()) * 100f)
+                    }
+                } else if (state == Producer.State.kEND) {
+                    transcoderSemaphore.release()
+                    runOnUiThread {
+                        (activity as AlbumActivity).setEnable(true)
+                        lsq_editor_cut_load.setVisibility(View.GONE)
+                        lsq_editor_cut_load_parogress.setValue(0f)
+                        Toast.makeText(requireContext(), "视频转码结束", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+        })
+
+        val transcoderConfig = Producer.OutputConfig()
+        transcoderConfig.keyint = 1
+        transcoder.setOutputConfig(transcoderConfig)
+
+        if (!transcoder.init(outputPath, inputPath)) {
+            TLog.e("Transcoder Error")
+        }
+        transcoder.start()
+        runOnUiThread {
+            (activity as AlbumActivity).setEnable(false)
+            toast("视频转码开始")
+        }
+        setCanBackPressed(false)
+        transcoderSemaphore.acquire()
+        transcoder.release()
+        return outputPath
+    }
+
+    protected fun setCanBackPressed(b : Boolean){
+        (requireActivity() as AlbumActivity).setCanBackPressed(b)
     }
 
     companion object {

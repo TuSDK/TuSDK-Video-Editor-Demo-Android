@@ -724,7 +724,8 @@ class TextStickerActivity : BaseActivity() {
                     }
                     mThreadPool?.execute {
                         mCurrentItemView?.setClipDuration(mCurrentItemViewStart, mCurrentItemViewEnd)
-                        mPlayerContext.refreshFrame()
+                        mPlayer?.previewFrame(mCurrentItemViewStart)
+//                        mPlayerContext.refreshFrame()
                     }
                 }
 

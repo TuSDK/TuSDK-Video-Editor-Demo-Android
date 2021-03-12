@@ -24,6 +24,7 @@ import org.lasque.tusdkpulse.core.utils.TLog
 import org.lasque.tusdkeditoreasydemo.base.BaseActivity
 import org.lasque.tusdkeditoreasydemo.base.DraftItem
 import org.lasque.tusdkeditoreasydemo.base.OnItemClickListener
+import org.lasque.tusdkeditoreasydemo.base.OnItemDeleteClickListener
 
 /**
  * TuSDK
@@ -42,12 +43,6 @@ class DraftActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.draft_activity)
-
-        lsq_title.setText(FunctionType.DraftList.mTitleId)
-        lsq_output_video.visibility = View.GONE
-        lsq_back.setOnClickListener {
-            finish()
-        }
 
         val sp = getSharedPreferences("Tu-Draft-list", Context.MODE_PRIVATE)
         val gson = Gson()
@@ -80,10 +75,28 @@ class DraftActivity : BaseActivity() {
                         }
                         else -> {
                             startActivity<ApiActivity>("function" to functionType,DraftItem.Draft_Path_Key to item.draftPath)
-
                         }
                     }
                 }
+            })
+
+            draftAdapter.setOnItemDeleteClickListener(object : OnItemDeleteClickListener<DraftItem,DraftAdapter.DraftViewHolder>{
+                override fun onItemDelete(pos: Int, holder: DraftAdapter.DraftViewHolder, item: DraftItem) {
+                    draftList.removeAt(pos)
+                    draftAdapter.updateDraftList(draftList)
+
+
+                    if (draftList.isEmpty()){
+                        lsq_particle_list_panel.visibility = View.GONE
+                        lsq_draft_null_slogan.visibility = View.VISIBLE
+                        sp.edit().remove(DraftItem.Draft_List_Key).apply()
+
+                    } else{
+                        val draftString = gson.toJson(draftList)
+                        sp.edit().putString(DraftItem.Draft_List_Key,draftString).apply()
+                    }
+                }
+
             })
 
             val layoutManager = LinearLayoutManager(this)
@@ -92,6 +105,18 @@ class DraftActivity : BaseActivity() {
             lsq_draft_list.adapter = draftAdapter
 
             mDraftAdapter = draftAdapter
+        }
+
+        lsq_title.setText(FunctionType.DraftList.mTitleId)
+        lsq_output_video.text = "删除全部草稿"
+        lsq_output_video.setOnClickListener {
+            sp.edit().remove(DraftItem.Draft_List_Key).apply()
+            lsq_particle_list_panel.visibility = View.GONE
+            lsq_draft_null_slogan.visibility = View.VISIBLE
+        }
+        lsq_output_video.visibility = View.VISIBLE
+        lsq_back.setOnClickListener {
+            finish()
         }
 
     }

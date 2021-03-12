@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         val versionCode = TuVideoClipSDK.SDK_VERSION
 
-        lsq_copyright_info.setText("TuSDK Video Clip SDK ${versionCode}-${TuVideoClipSDK.BUILD_VERSION} \n" +
+        lsq_copyright_info.setText("TuSDK Video Editor SDK ${versionCode}-${TuVideoClipSDK.BUILD_VERSION} \n" +
                 " © 2020 TUTUCLOUD.COM")
 
         val sp = getSharedPreferences("TU-TTF",Context.MODE_PRIVATE)

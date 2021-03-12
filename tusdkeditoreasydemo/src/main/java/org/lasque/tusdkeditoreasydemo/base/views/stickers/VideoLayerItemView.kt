@@ -186,7 +186,7 @@ public class VideoLayerItemView : LayerItemViewBase {
         val videoClip = layer.getClip(Video_CLIP_ID)
         val videoClipConfig = videoClip.config
         mCurrentPath = videoClipConfig.getString(VideoFileClip.CONFIG_PATH)
-        mClipDuration = videoClipConfig.getIntNumber(VideoFileClip.CONFIG_TRIM_DURATION)
+        mClipDuration = videoClipConfig.getIntNumberOr(VideoFileClip.CONFIG_TRIM_DURATION,videoClip.streamInfo.duration)
 
         var audioLayer = mEditor!!.audioComposition().allLayers[mCurrentLayerId] as ClipLayer
         val audioLayerConfig = audioLayer.config

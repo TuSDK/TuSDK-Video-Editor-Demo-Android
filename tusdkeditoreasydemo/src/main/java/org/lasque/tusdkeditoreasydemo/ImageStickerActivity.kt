@@ -440,6 +440,9 @@ public class ImageStickerActivity : BaseActivity() {
             val layerItem = LayerItem(key, layer, path)
             layerList.add(layerItem)
         }
+        Collections.sort(layerList, kotlin.Comparator { t, t2 ->
+            if (t.id > t2.id) {-1} else if (t.id < t2.id){1} else {0}
+        })
         return layerList
     }
 
@@ -728,7 +731,7 @@ public class ImageStickerActivity : BaseActivity() {
                     mCurrentItemViewEnd = itemEnd
                     mThreadPool?.execute {
                         mCurrentItemView?.setClipDuration(mCurrentItemViewStart,mCurrentItemViewEnd)
-                        mPlayerContext.refreshFrame()
+                        mPlayer?.previewFrame(mCurrentItemViewStart)
                     }
                 }
 

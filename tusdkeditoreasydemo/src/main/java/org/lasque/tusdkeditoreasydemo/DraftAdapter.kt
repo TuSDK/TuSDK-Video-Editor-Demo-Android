@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.draft_item_layout.view.*
 import org.lasque.tusdkeditoreasydemo.base.BaseAdapter
 import org.lasque.tusdkeditoreasydemo.base.DraftItem
+import org.lasque.tusdkeditoreasydemo.base.OnItemDeleteClickListener
 
 /**
  * TuSDK
@@ -31,10 +32,13 @@ import org.lasque.tusdkeditoreasydemo.base.DraftItem
  */
 class DraftAdapter(itemList: MutableList<DraftItem>, context: Context) : BaseAdapter<DraftItem, DraftAdapter.DraftViewHolder>(itemList, context) {
 
+    private var mItemDeleteClickListener : OnItemDeleteClickListener<DraftItem,DraftViewHolder>? = null
+
     class DraftViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val funcTitle = itemView.lsq_draft_func_type
         val path = itemView.lsq_draft_path
         val date = itemView.lsq_draft_date
+        val delete = itemView.lsq_draft_delete
     }
 
     override fun onChildCreateViewHolder(parent: ViewGroup, viewType: Int): DraftViewHolder {
@@ -46,6 +50,9 @@ class DraftAdapter(itemList: MutableList<DraftItem>, context: Context) : BaseAda
             mOnItemClickListener?.onItemClick(position, holder, item)
         }
 
+        holder.delete.setOnClickListener {
+            mItemDeleteClickListener?.onItemDelete(position,holder,item)
+        }
         val func = FunctionType.values()[item.funcType]
         holder.funcTitle.setText(func.mTitleId)
 
@@ -56,5 +63,9 @@ class DraftAdapter(itemList: MutableList<DraftItem>, context: Context) : BaseAda
     public fun updateDraftList(itemList: MutableList<DraftItem>){
         mItemList = itemList
         notifyDataSetChanged()
+    }
+
+    public fun setOnItemDeleteClickListener(itemDeleteClickListener: OnItemDeleteClickListener<DraftItem,DraftViewHolder>){
+        mItemDeleteClickListener = itemDeleteClickListener
     }
 }
