@@ -39,14 +39,17 @@ import kotlinx.android.synthetic.main.image_sticker_activity.lsq_editor_cut_load
 import kotlinx.android.synthetic.main.image_sticker_activity.lsq_sticker_play
 import kotlinx.android.synthetic.main.include_image_blend_layout.*
 import kotlinx.android.synthetic.main.include_image_duration_layout.*
+import kotlinx.android.synthetic.main.include_image_duration_layout.lsq_start_bar
+import kotlinx.android.synthetic.main.include_image_duration_layout.lsq_start_title
 import kotlinx.android.synthetic.main.include_image_function_layout.*
 import kotlinx.android.synthetic.main.include_image_layer_list_layout.*
 import kotlinx.android.synthetic.main.include_sticker_view.*
 import kotlinx.android.synthetic.main.include_sticker_view.lsq_api_displayView
 import kotlinx.android.synthetic.main.include_sticker_view.lsq_editor_play
-import kotlinx.android.synthetic.main.include_sticker_view.lsq_player_duration
-import kotlinx.android.synthetic.main.include_sticker_view.seekBar
+import kotlinx.android.synthetic.main.image_sticker_activity.lsq_player_duration
+import kotlinx.android.synthetic.main.image_sticker_activity.seekBar
 import kotlinx.android.synthetic.main.include_title_layer.*
+import kotlinx.android.synthetic.main.movie_cut_fragment.*
 import kotlinx.android.synthetic.main.repeat_fragment.view.*
 import org.jetbrains.anko.toast
 import org.lasque.tusdkpulse.core.utils.DateHelper
@@ -57,6 +60,7 @@ import org.lasque.tusdkeditoreasydemo.album.AlbumInfo
 import org.lasque.tusdkeditoreasydemo.album.AlbumItemType
 import org.lasque.tusdkeditoreasydemo.base.*
 import org.lasque.tusdkeditoreasydemo.base.views.stickers.*
+import org.lasque.tusdkpulse.core.utils.FileHelper
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
@@ -158,14 +162,17 @@ public class ImageStickerActivity : BaseActivity() {
             override fun onItemViewSelected(type: LayerType, view: LayerItemViewBase) {
                 playerPause()
                 mCurrentItemView = view
-                var startPos = (mCurrentItemView!!.getLayerStartPos() / mCurrentItemView!!.getLayerMaxDuration().toDouble()) * 100
-                var endPos = (mCurrentItemView!!.getLayerEndPos() / mCurrentItemView!!.getLayerMaxDuration().toDouble()) * 100
+                var startPos = (mCurrentItemView!!.getClipStart() / mCurrentItemView!!.getClipMaxDuration().toDouble()) * 100
+                var endPos = (mCurrentItemView!!.getClipEnd() / mCurrentItemView!!.getClipMaxDuration().toDouble()) * 100
                 lsq_bar_can_touch.isClickable = false
                 setTimeBarValue(startPos.toInt(), endPos.toInt())
                 mBlendAdapter?.findMode(mCurrentItemView!!.getBlendMode())
                 runOnUiThread {
                     lsq_image_duration_btn.visibility = View.VISIBLE
                     lsq_image_blend_btn.visibility = View.VISIBLE
+                    lsq_layer_start_bar.progress = mCurrentItemView!!.getLayerStartPos().toInt()
+
+                    setCurrentState(mCurrentItemView!!.getLayerStartPos(),mCurrentItemView!!.getClipStart(),mCurrentItemView!!.getClipEnd())
                 }
 
             }
@@ -206,11 +213,23 @@ public class ImageStickerActivity : BaseActivity() {
             isFromModel = true
             mThreadPool.execute {
                 val editorModel = EditorModel(modelPath)
+                editorModel.setModelDelegate { name, type, path ->
+                    path
+                }
+                editorModel.modifyClipPath()
                 if (!mEditor.create(editorModel)){
                     TLog.e("Editor Create failed")
                 }
                 if (!mEditor.build()){
                     TLog.e("Editor Build failed")
+                }
+
+                val layerMap = mEditor.audioComposition().allLayers
+
+                for (layer : Layer? in layerMap.values){
+                    if (layer == null){
+                        throw Exception("has null layer")
+                    }
                 }
 
                 initPlayer()
@@ -239,6 +258,7 @@ public class ImageStickerActivity : BaseActivity() {
                     LayerItemViewBase.CURRENT_LAYER_ID = max(videoLast,imageLast) + 1
 
                     for (i in videoLayers){
+                        TLog.e("layers id $i")
                         lsq_sticker_view.restoreVideo(i.toLong())
                     }
                     for (i in imageLayers){
@@ -320,8 +340,9 @@ public class ImageStickerActivity : BaseActivity() {
         val blendModes = mutableListOf<String>(
                 BLEND_MODE_Default,
                 BLEND_MODE_Normal,
+                BLEND_MODE_Overlay,
                 BLEND_MODE_Add,
-                BLEND_MODE_Substract,
+                BLEND_MODE_Subtract,
                 BLEND_MODE_Negation,
                 BLEND_MODE_Average,
                 BLEND_MODE_Multiply,
@@ -329,9 +350,10 @@ public class ImageStickerActivity : BaseActivity() {
                 BLEND_MODE_Screen,
                 BLEND_MODE_Softlight,
                 BLEND_MODE_Hardlight,
+                BLEND_MODE_Linearlight,
+                BLEND_MODE_Pinlight,
                 BLEND_MODE_Lighten,
                 BLEND_MODE_Darken,
-                BLEND_MODE_Reflect,
                 BLEND_MODE_Exclusion
         )
         val blendAdapter = BlendAdapter(blendModes,this)
@@ -375,6 +397,20 @@ public class ImageStickerActivity : BaseActivity() {
                     playerPause()
                     mPlayer!!.lock()
                     val res = mEditor!!.videoComposition().swapLayer(item0.id,item1.id)
+                    val audioRes = mEditor!!.audioComposition().swapLayer(item0.id,item1.id)
+                    if (!audioRes){
+                        var audioLayer_0 : Layer? = mEditor!!.audioComposition().allLayers[item0.id]
+                        var audioLayer_1 : Layer? = mEditor!!.audioComposition().allLayers[item1.id]
+
+                        if (audioLayer_0 == null && audioLayer_1 != null){
+                            mEditor!!.audioComposition().deleteLayer(item1.id)
+                            mEditor!!.audioComposition().addLayer(item0.id,audioLayer_1)
+                        } else if (audioLayer_1 == null && audioLayer_0 != null){
+                            mEditor!!.audioComposition().deleteLayer(item0.id)
+                            mEditor!!.audioComposition().addLayer(item1.id,audioLayer_0)
+                        }
+                    }
+
                     if (!res){
                         return@execute
                     }
@@ -446,13 +482,21 @@ public class ImageStickerActivity : BaseActivity() {
         return layerList
     }
 
+    private var mCurrentProducer : VideoEditor.Producer? = null
+
+    private var mCurrentSavePath = ""
+
+    private var isNeedSave = true
+
     private fun saveVideo() {
         mThreadPool.execute {
+            isNeedSave = true
             val producer = mEditor.newProducer()
     //                val outputFilePath = "${TuSdkContext.context().getExternalFilesDir(DIRECTORY_DCIM)!!.absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
 
             val outputFilePath = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
 
+            mCurrentSavePath = outputFilePath
             val config = Producer.OutputConfig()
             config.watermark = BitmapHelper.getRawBitmap(this, R.raw.sample_watermark)
             config.watermarkPosition = 1
@@ -460,9 +504,10 @@ public class ImageStickerActivity : BaseActivity() {
             producer.setListener { state, ts ->
                 if (state == Producer.State.kEND) {
                     mThreadPool.execute {
-                        producer.cancel()
                         producer.release()
                         mEditor!!.resetProducer()
+                        mPlayer!!.seekTo(mPlayerContext.currentFrame)
+                        mCurrentProducer = null
                     }
                     val contentValue = ImageSqlHelper.getCommonContentValues()
                     sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(outputFilePath))))
@@ -470,12 +515,14 @@ public class ImageStickerActivity : BaseActivity() {
                         setEnable(true)
                         lsq_editor_cut_load.setVisibility(View.GONE)
                         lsq_editor_cut_load_parogress.setValue(0f)
-                        Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
+                        if (isNeedSave)
+                            Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
                     }
                 } else if (state == Producer.State.kWRITING) {
+                    val currentP = (ts / producer.duration.toFloat()) * 100f
                     runOnUiThread {
                         lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                        lsq_editor_cut_load_parogress.setValue((ts / producer.duration.toFloat()) * 100f)
+                        lsq_editor_cut_load_parogress.setValue(currentP)
                     }
                 }
             }
@@ -488,6 +535,8 @@ public class ImageStickerActivity : BaseActivity() {
                 TLog.e("[Error] EditorProducer Start failed")
 
             }
+
+            mCurrentProducer = producer
         }
     }
 
@@ -560,9 +609,9 @@ public class ImageStickerActivity : BaseActivity() {
                     val item = albumList[0]
                     val isVideo = requestCode == VIDEO_REQUEST_CODE
                     if (item.type == AlbumItemType.Video){
-                        lsq_sticker_view.appendVideo(albumList[0].path,0,0)
+                        lsq_sticker_view.appendVideo(albumList[0].path,0,0,true,albumList[0].audioPath)
                     } else {
-                        lsq_sticker_view.appendImage(albumList[0].path,0,0)
+                        lsq_sticker_view.appendImage(albumList[0].path,0,3000)
                     }
                     mThreadPool.execute {
                         initPlayer()
@@ -578,9 +627,9 @@ public class ImageStickerActivity : BaseActivity() {
                     val item = albumList[0]
                     val isVideo = requestCode == VIDEO_REQUEST_CODE
                     if (item.type == AlbumItemType.Video){
-                        lsq_sticker_view.appendVideo(albumList[0].path,mCurrentDutation,0)
+                        lsq_sticker_view.appendVideo(albumList[0].path,mCurrentDutation,0,true,albumList[0].audioPath)
                     } else {
-                        lsq_sticker_view.appendImage(albumList[0].path,mCurrentDutation,0)
+                        lsq_sticker_view.appendImage(albumList[0].path,mCurrentDutation,mCurrentDutation + 3000)
                     }
                 }
             }
@@ -594,6 +643,9 @@ public class ImageStickerActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (!Engine.getInstance().checkEGL()){
+            throw Exception("dsssssssssssssssss");
+        }
     }
 
     private fun initLayer(){
@@ -656,15 +708,17 @@ public class ImageStickerActivity : BaseActivity() {
 
                 val durationMS = mPlayer!!.duration
                 mMaxDuration = durationMS
+                lsq_layer_start_bar.max = mMaxDuration.toInt()
 
                 val durationVideoHour = durationMS / 3600000
 
                 val durationVideoMinute = (durationMS % 3600000) / 60000
 
                 val durationVideoSecond = (durationMS % 60000 / 1000)
+                val duration = mPlayer!!.duration
                 runOnUiThread {
                     if (mPlayer == null) return@runOnUiThread
-                    val duration = mPlayer!!.duration
+
                     seekBar.max = duration.toInt()
                     lsq_sticker_view.requestShower(ts)
                     if (!isSeekBarTouch){
@@ -716,7 +770,7 @@ public class ImageStickerActivity : BaseActivity() {
                 }
 
                 override fun onEndTouch(minPercentage: Float, maxPercentage: Float) {
-                    val max = mCurrentItemView!!.getLayerMaxDuration()
+                    val max = mCurrentItemView!!.getClipMaxDuration()
                     val itemStart = (max * minPercentage / 100).toLong()
                     val itemEnd = (max * maxPercentage / 100).toLong()
                     if (itemEnd == itemStart){
@@ -726,17 +780,41 @@ public class ImageStickerActivity : BaseActivity() {
                         toast("画中画素材长度不能为0")
                         return
                     }
-                    lsq_debug_info.setText("当前开始时间 ${itemStart} 当前结束时间 ${itemEnd}")
+
+                    setCurrentState(mCurrentItemView!!.getLayerStartPos(),itemStart,itemEnd)
+
                     mCurrentItemViewStart = itemStart
                     mCurrentItemViewEnd = itemEnd
                     mThreadPool?.execute {
                         mCurrentItemView?.setClipDuration(mCurrentItemViewStart,mCurrentItemViewEnd)
-                        mPlayer?.previewFrame(mCurrentItemViewStart)
+                        mPlayer?.previewFrame(mCurrentItemView!!.getLayerStartPos())
                     }
                 }
 
                 override fun getMinMaxString(value: Int, value1: Int): String {
                     return super.getMinMaxString(value, value1)
+                }
+
+            })
+
+            lsq_layer_start_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+
+                private var mCurrentPos = 0
+
+                override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                    if (!p2) return
+
+                    mCurrentPos = p1
+                }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(p0: SeekBar?) {
+                    mThreadPool?.execute {
+                        mPlayer?.previewFrame(mCurrentPos.toLong())
+                    }
                 }
 
             })
@@ -767,5 +845,48 @@ public class ImageStickerActivity : BaseActivity() {
             lsq_start_bar.invalidate()
         }
     }
+
+    private fun setCurrentState(layerStart : Long,clipStart : Long,clipEnd : Long) {
+        val currentVideoHour = clipStart / 3600000
+        val currentVideoMinute = (clipStart % 3600000) / 60000
+
+        val currentVideoSecond = (clipStart % 60000 / 1000)
+
+        val durationVideoHour = clipEnd / 3600000
+
+        val durationVideoMinute = (clipEnd % 3600000) / 60000
+
+        val durationVideoSecond = (clipEnd % 60000 / 1000)
+
+        val currentDurationVideoHour = layerStart / 3600000
+
+        val currentDurationVideoMinute = (layerStart % 3600000) / 60000
+
+        val currentDurationVideoSecond = (layerStart % 60000 / 1000)
+
+        lsq_debug_info.setText("当前片段 开始时间 : ${currentVideoHour}:$currentVideoMinute:$currentVideoSecond 结束时间 : $durationVideoHour:$durationVideoMinute:$durationVideoSecond \n" +
+                "当前图层偏移 : ${currentDurationVideoHour}:$currentDurationVideoMinute:$currentDurationVideoSecond")
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        playerPause()
+
+        if (mCurrentProducer != null){
+            mThreadPool.execute {
+                isNeedSave = false
+                mCurrentProducer?.cancel()
+                FileHelper.delete(File(mCurrentSavePath))
+                mCurrentProducer = null
+            }
+        }
+    }
+
+
 
 }

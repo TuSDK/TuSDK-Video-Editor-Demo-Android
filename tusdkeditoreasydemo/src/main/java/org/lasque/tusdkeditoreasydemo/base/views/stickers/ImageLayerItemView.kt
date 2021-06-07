@@ -179,6 +179,9 @@ public class ImageLayerItemView : LayerItemViewBase {
         mClipDuration = imageClipConfig?.getIntNumber(ImageClip.CONFIG_DURATION)!!
         mCurrentClip = imageClip
         mCurrentClipConfig = imageClipConfig
+
+        mClipStartPos = 0
+        mClipEndPos = mClipDuration
     }
 
     override fun restoreLayer(id: Int) {
@@ -207,21 +210,27 @@ public class ImageLayerItemView : LayerItemViewBase {
         }
         mCurrentClip = imageClip
         mCurrentClipConfig = imageClipConfig
+
+        mClipStartPos = 0
+        mClipEndPos = mClipDuration
+        mClipMaxDuration = mClipDuration
     }
 
     override fun setClipDuration(start: Long, end: Long) {
-        val end = max(3000,end)
+//        val end = max(1000,end)
         mClipDuration = end - start
-        mLayerStartPos = start
-        mLayerEndPos = end
-        TLog.e("duration ${mClipDuration} startpos ${mLayerStartPos} end ${end}")
+
+        mClipStartPos = start
+        mClipEndPos = end
+
+        mLayerEndPos = mLayerStartPos + mClipDuration
+
         mEditor!!.player?.lock()
         if (mClipDuration != 0L) {
             mCurrentClipConfig?.setNumber(ImageClip.CONFIG_DURATION, mClipDuration)
             mCurrentClip?.setConfig(mCurrentClipConfig)
         }
-        mCurrentLayerConfig?.setNumber(Layer.CONFIG_START_POS, start)
-        mCurrentLayer?.setConfig(mCurrentLayerConfig)
+
         if (!mEditor!!.build()) {
             TLog.e("Editor reBuild failed")
             throw Exception()

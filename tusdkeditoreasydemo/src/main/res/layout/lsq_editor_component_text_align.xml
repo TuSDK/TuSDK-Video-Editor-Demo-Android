@@ -31,11 +31,13 @@
             android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/leftalignment_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/edit_text_ic_left"/>
 
             <TextView
+                android:id="@+id/leftalignment_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/lsq_text_style_alignleft"
@@ -55,11 +57,13 @@
             android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/centeralignment_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/edit_text_ic_center"/>
 
             <TextView
+                android:id="@+id/centeralignment_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/lsq_text_style_aligncenter"
@@ -79,11 +83,13 @@
             android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/rightalignment_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/edit_text_ic_right"/>
 
             <TextView
+                android:id="@+id/rightalignment_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/lsq_text_style_alignright"

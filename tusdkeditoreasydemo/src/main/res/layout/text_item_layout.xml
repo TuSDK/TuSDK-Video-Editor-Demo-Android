@@ -5,6 +5,7 @@
     android:layout_height="80dp">
 
     <ImageView
+        android:scaleType="centerInside"
         android:id="@+id/lsq_text_icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

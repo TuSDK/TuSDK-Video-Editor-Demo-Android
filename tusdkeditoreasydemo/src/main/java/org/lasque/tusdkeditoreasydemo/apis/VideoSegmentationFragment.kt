@@ -235,7 +235,7 @@ class VideoSegmentationFragment : BaseFragment(FunctionType.VideoSegmentation) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video,item.audioPath)
 
         val videoClip = mVideoItem!!.mVideoClip
         val audioClip = mVideoItem!!.mAudioClip

@@ -226,7 +226,7 @@ class SpeedFragment : BaseFragment(FunctionType.Speed) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        var mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video)
+        var mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video,item.audioPath)
 
         val videoClip = mVideoItem.mVideoClip
         val audioClip = mVideoItem.mAudioClip

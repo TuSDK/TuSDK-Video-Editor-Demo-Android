@@ -63,6 +63,8 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
 
     private val mVideoLinkedList: LinkedList<VideoLayerItemView> = LinkedList()
 
+    private val mBubbleLinkedList : LinkedList<BubbleLayerItemView> = LinkedList()
+
     private val mLayerMap = HashMap<Int,LayerItemViewBase>()
 
     private var mCurrentLayerType = LayerType.Image
@@ -73,10 +75,16 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
 
     private var mDelegate: LayerViewDelegate? = null
 
+    private var mBubbleDelegate : BubbleLayerViewDelegate? = null
+
     public var isSelectedTwice = false
 
     public fun setLayerViewDelegate(delegate: LayerViewDelegate) {
         mDelegate = delegate;
+    }
+
+    public fun setBubbleLayerViewDelegate(delegate: BubbleLayerViewDelegate){
+        mBubbleDelegate = delegate
     }
 
     public fun setCurrentLayerType(type: LayerType) {
@@ -119,6 +127,9 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         for (view in mVideoLinkedList) {
             view.isSelected = (view == itemView)
         }
+        for (view in mBubbleLinkedList){
+            view.isSelected = (view == itemView)
+        }
 
         mDelegate?.onItemViewSelected(itemView.getCurrentLayerType(), itemView)
     }
@@ -145,8 +156,13 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         onItemSelected(view)
     }
 
-    public fun appendVideo(path: String, start: Long, end: Long, needAudio: Boolean = true) {
-        val view = buildVideoItemView(path, start, end, needAudio)
+    public fun appendVideo(path: String, start: Long, end: Long, needAudio: Boolean = true,audioPath : String = path) {
+        val view = buildVideoItemView(path, start, end, needAudio,audioPath)
+        onItemSelected(view)
+    }
+
+    public fun appendBubble(path: String,start: Long,end: Long){
+        val view = buildBubbleItemView(path, start, end)
         onItemSelected(view)
     }
 
@@ -160,6 +176,10 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
 
     public fun restoreText(id : Long){
         restoreTextItemView(id)
+    }
+
+    public fun restoreBubble(id : Long){
+        restoreBubbleItemView(id)
     }
 
     private fun restoreVideoItemView(id : Long){
@@ -213,12 +233,30 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         mTextLinkedList.add(view)
     }
 
-    private fun buildVideoItemView(path: String, start: Long, end: Long, needAudio: Boolean): VideoLayerItemView {
+    private fun restoreBubbleItemView(id : Long){
+        val view = TuSdkViewHelper.buildView<BubbleLayerItemView>(context,getItemViewResId(LayerType.Bubble))
+        view.setEditor(mEditor!!)
+        view.setThreadPool(mThreadPool!!)
+        view.setPlayerContext(mPlayerContext!!)
+        view.setCurrentLayerType(LayerType.Bubble)
+        view.setStickerLayerType(mCurrentLayerType)
+        view.setListener(this)
+        view.setParentFrame(TuSdkViewHelper.locationInWindow(this))
+        view.setParentRect(mParentRect)
+        view.setLayerMaps(mLayerMap)
+        view.setBubbleDelegate(mBubbleDelegate)
+        view.restoreLayer(id.toInt())
+        addView(view)
+        mBubbleLinkedList.add(view)
+    }
+
+    private fun buildVideoItemView(path: String, start: Long, end: Long, needAudio: Boolean,audioPath: String): VideoLayerItemView {
         val view = TuSdkViewHelper.buildView<VideoLayerItemView>(context, getItemViewResId(LayerType.Video))
         view.setEditor(mEditor!!)
         view.setThreadPool(mThreadPool!!)
         view.setPlayerContext(mPlayerContext!!)
         view.setVideoPath(path)
+        view.setAudioPath(audioPath)
         view.setCurrentLayerType(LayerType.Video)
         view.setStickerLayerType(mCurrentLayerType)
         view.setListener(this)
@@ -229,6 +267,7 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         view.needAudio(needAudio)
         view.setLayerMaps(mLayerMap)
         val res = mThreadPool?.submit(Callable<Boolean> {
+            view.setLayerStartPos(mPlayerContext!!.currentFrame)
             view.setClipDuration(start, end)
             view.createLayer()
             mPlayerContext?.refreshFrame()
@@ -255,6 +294,7 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         view.setParentRect(mParentRect)
         view.setLayerMaps(mLayerMap)
         val res = mThreadPool?.submit(Callable<Boolean> {
+            view.setLayerStartPos(mPlayerContext!!.currentFrame)
             view.setClipDuration(start, end)
             view.createLayer()
             mPlayerContext?.refreshFrame()
@@ -287,6 +327,7 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         view.setParentRect(mParentRect)
         view.setLayerMaps(mLayerMap)
         val res = mThreadPool?.submit(Callable<Boolean> {
+            view.setLayerStartPos(mPlayerContext!!.currentFrame)
             view.setClipDuration(start, end)
             view.createLayer()
             mPlayerContext?.refreshFrame()
@@ -298,8 +339,38 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
         return view
     }
 
+    private fun buildBubbleItemView(path : String?,start: Long,end: Long) : BubbleLayerItemView{
+        val view = TuSdkViewHelper.buildView<BubbleLayerItemView>(context,getItemViewResId(LayerType.Bubble))
+        view.setEditor(mEditor!!)
+        view.setThreadPool(mThreadPool!!)
+        view.setPlayerContext(mPlayerContext!!)
+        view.setBubblePath(path!!)
+        view.setCurrentLayerType(LayerType.Bubble)
+        view.setStickerLayerType(mCurrentLayerType)
+        view.setListener(this)
+        view.setBubbleDelegate(mBubbleDelegate)
+        view.setStroke(Color.WHITE,ContextUtils.dip2px(context,2f))
+        view.setParentRect(mParentRect)
+        view.setParentFrame(TuSdkViewHelper.locationInWindow(this))
+        view.setLayerMaps(mLayerMap)
+        val res = mThreadPool?.submit(Callable<Boolean> {
+            view.setLayerStartPos(mPlayerContext!!.currentFrame)
+            view.setClipDuration(start, end)
+            view.createLayer()
+            mPlayerContext?.refreshFrame()
+            true
+        })
+        res?.get()
+        addView(view)
+        mBubbleLinkedList.add(view)
+        return view
+    }
+
     private fun getItemViewResId(type: LayerType): Int {
         return when (type) {
+            LayerType.Bubble->{
+                BubbleLayerItemView.getLayoutId()
+            }
             LayerType.Image -> {
                 ImageLayerItemView.getLayoutId()
             }
@@ -321,6 +392,9 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
             view.isSelected = false
         }
         for (view in mVideoLinkedList) {
+            view.isSelected = false
+        }
+        for (view in mBubbleLinkedList){
             view.isSelected = false
         }
         mCurrentSelectedView = null
@@ -356,12 +430,17 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
             view.setParentRect(videoSize)
             view.resize(TuSdkViewHelper.locationInWindow(this))
         }
+        for (view in mBubbleLinkedList){
+            view.setParentRect(videoSize)
+            view.resize(TuSdkViewHelper.locationInWindow(this))
+        }
     }
 
     public fun removeAllSticker() {
         removeAllTexts()
         removeAllImages()
         removeAllVideos()
+        removeAllBubble()
     }
 
     public fun removeAllTexts() {
@@ -385,6 +464,16 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
 
     }
 
+    public fun removeAllBubble(){
+        for (view in mBubbleLinkedList){
+            removeView(view)
+            mEditor!!.videoComposition().deleteLayer(view.mCurrentLayerId)
+        }
+        mBubbleLinkedList.clear()
+        mPlayerContext?.refreshFrame()
+        mCurrentSelectedView = null
+    }
+
     public fun removeAllVideos() {
         for (view in mVideoLinkedList) {
             removeView(view)
@@ -405,6 +494,9 @@ public class StickerLayerView : FrameLayout, OnStickerLayerItemViewListener {
             view.requestShower(frame)
         }
         for (view in mVideoLinkedList) {
+            view.requestShower(frame)
+        }
+        for (view in mBubbleLinkedList){
             view.requestShower(frame)
         }
     }

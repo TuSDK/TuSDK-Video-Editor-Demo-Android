@@ -16,9 +16,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.tusdk.pulse.editor.VideoEditor
+import org.jetbrains.anko.startActivityForResult
+import org.jetbrains.anko.support.v4.startActivityForResult
 import org.lasque.tusdkpulse.core.utils.TLog
 import org.lasque.tusdkeditoreasydemo.ApiActivity
 import org.lasque.tusdkeditoreasydemo.FunctionType
+import org.lasque.tusdkeditoreasydemo.album.AlbumActivity
 import org.lasque.tusdkeditoreasydemo.album.AlbumInfo
 import java.util.concurrent.ExecutorService
 
@@ -101,6 +104,10 @@ abstract class BaseFragment(type : FunctionType = FunctionType.Null) : Fragment(
 
     protected fun setCanBackPressed(b : Boolean){
         (requireActivity() as ApiActivity).setCanBackPressed(b)
+    }
+
+    protected fun openAlbum(max: Int, onlyImage: Boolean, onlyVideo: Boolean,requestCode : Int,min : Int = -1){
+        startActivityForResult<AlbumActivity>(requestCode, "maxSize" to max, "onlyImage" to onlyImage, "onlyVideo" to onlyVideo,"minSize" to min)
     }
 
 

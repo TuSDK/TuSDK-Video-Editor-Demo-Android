@@ -73,6 +73,10 @@ public interface LayerViewDelegate{
     fun onItemUnselected(type: LayerType)
 }
 
+public interface BubbleLayerViewDelegate{
+    fun onBubbleUpdateText(view : BubbleLayerItemView,textIndex : Int)
+}
+
 public enum class LayerType{
-    Image,Text,Video,ImageAndVideo;
+    Image,Text,Video,ImageAndVideo,Bubble;
 }

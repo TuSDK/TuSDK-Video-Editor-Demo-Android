@@ -120,6 +120,7 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
                         }
                         refreshEditor()
                         playerUnlock()
+                        mEditor!!.player.seekTo(0)
                         mOnPlayerStateUpdateListener?.onPlayerPlay()
                         setCanBackPressed(true)
                     }
@@ -166,7 +167,7 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video,item.audioPath)
         val videoClip = mVideoItem!!.mVideoClip
         val audioClip = mVideoItem!!.mAudioClip
 
@@ -225,10 +226,11 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
         transcoder.setListener(object : Producer.Listener {
             override fun onEvent(state: Producer.State?, ts: Long) {
                 if (state == Producer.State.kWRITING) {
+                    val currentDuration = transcoder.duration.toFloat()
                     runOnUiThread {
                         lsq_video_reverse.visibility = View.GONE
                         lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                        lsq_editor_cut_load_parogress.setValue((ts / transcoder.duration.toFloat()) * 100f)
+                        lsq_editor_cut_load_parogress.setValue((ts / currentDuration) * 100f)
                     }
                 } else if (state == Producer.State.kEND) {
                     transcoderSemaphore.release()
@@ -296,5 +298,13 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
     override fun onDestroy() {
         super.onDestroy()
 
+//        mThreadPool?.execute {
+//            if (mVideoReverseClip != null){
+//                mVideoReverseClip!!.deactivate()
+//            }
+//            if (mVideoClip != null){
+//                mVideoClip!!.deactivate()
+//            }
+//        }
     }
 }

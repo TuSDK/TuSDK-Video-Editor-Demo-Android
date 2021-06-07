@@ -10,6 +10,7 @@
  */
 package org.lasque.tusdkeditoreasydemo.album
 
+import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.tusdk.pulse.MediaInspector
 import com.tusdk.pulse.Producer
 import com.tusdk.pulse.Transcoder
+import com.tusdk.pulse.VideoPreprocessor
 import kotlinx.android.synthetic.main.movie_album_fragment.*
 import kotlinx.android.synthetic.main.movie_album_fragment.lsq_editor_cut_load
 import kotlinx.android.synthetic.main.movie_album_fragment.lsq_editor_cut_load_parogress
@@ -36,6 +38,7 @@ import org.lasque.tusdkeditoreasydemo.R
 import org.lasque.tusdkeditoreasydemo.base.BaseActivity.Companion.ALBUM_RESULT_CODE
 import org.lasque.tusdkeditoreasydemo.utils.MD5Util
 import org.lasque.tusdkpulse.core.TuSdk
+import org.lasque.tusdkpulse.core.struct.TuSdkSize
 import org.lasque.tusdkpulse.core.utils.FileHelper
 import org.lasque.tusdkpulse.core.utils.StringHelper
 import org.lasque.tusdkpulse.core.utils.TLog
@@ -47,6 +50,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.math.max
 
 class AlbumFragment : Fragment(), LoadTaskDelegate {
 
@@ -112,9 +117,11 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
             val path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA))
             val duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION))
             val createDate = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED))
+            val width = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH))
+            val height = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT))
             //根据时间长短加入显示列表
             if (duration in 1 until MAX_VIDEO_DURATION) {
-                albumList.add(AlbumInfo(path, AlbumItemType.Video, duration, createDate, MD5Util.crypt(path)))
+                albumList.add(AlbumInfo(path, AlbumItemType.Video, duration, createDate, MD5Util.crypt(path), max(width,height)))
             }
         }
         cursor.close()
@@ -124,7 +131,7 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
         var imageList: ArrayList<ImageSqlInfo>? = ImageSqlHelper.getPhotoList(requireActivity().contentResolver, true)
         if (imageList != null)
             for (item in imageList) {
-                albumList.add(AlbumInfo(item.path, AlbumItemType.Image, 0, item.createDate.timeInMillis, MD5Util.crypt(item.path)))
+                albumList.add(AlbumInfo(item.path, AlbumItemType.Image, 0, item.createDate.timeInMillis, MD5Util.crypt(item.path),item.size.maxSide()))
             }
     }
 
@@ -142,28 +149,37 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
 
         mPool.execute {
             val pathList = ArrayList<String>()
-            for (info in mSelectList) {
+
+            val transMap = HashMap<String,AlbumInfo>()
+
+            var needTransCount = 0
+            for (info in mSelectList){
                 if (info.type == AlbumItemType.Video){
                     val path = info.path
                     val mediaInfo = MediaInspector.shared().inspect(path)
                     for (index in mediaInfo.streams){
                         if (index is MediaInspector.MediaInfo.Video){
-                            // 目前版本暂时开始视频转码判断
                             if (!index.directReverse){
-                                runOnUiThread {
-                                    toast("视频关键帧过少,需要进行转码")
+
+                                val pathCache = requireContext().getSharedPreferences("path-cache",Context.MODE_PRIVATE)
+
+                                if (pathCache.contains(info.md5Key)){
+                                    val cachePath = pathCache.getString(info.md5Key,"")!!
+                                    val cacheFile = File(cachePath)
+                                    if (cacheFile.exists()){
+                                        info.path = cachePath
+                                        continue
+                                    } else {
+                                        pathCache.edit().remove(info.md5Key).apply()
+                                    }
                                 }
-                                info.path = videoTranscoder(path)
+                                transMap.put(info.path,info)
+                                needTransCount ++
                             } else {
                                 val toPath = getOutputTempFilePath()
                                 FileHelper.copyFile(File(path),toPath)
                                 info.path = toPath.absolutePath
                             }
-                            // 如需关闭视频转码 打开下面的代码,注释上方的代码
-//
-//                            val toPath = getOutputTempFilePath()
-//                            FileHelper.copyFile(File(path),toPath)
-//                            info.path = toPath.absolutePath
                         }
                     }
                 } else {
@@ -171,12 +187,68 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
                     val suffixIndex = path.lastIndexOf(".")
                     val suffix = path.substring(suffixIndex+1,path.length)
                     val toPath = getTempImagePath(suffix)
-                    FileHelper.copyFile(File(path),toPath)
+                    if (info.maxSize > 8192){
+                        val oBitmap = BitmapHelper.getBitmap(File(path))
+                        val saveBitmap = BitmapHelper.imageResize(oBitmap, TuSdkSize.create(2048))
+                        BitmapHelper.saveBitmap(toPath,saveBitmap,100)
+                    } else {
+                        FileHelper.copyFile(File(path),toPath)
+                    }
                     info.path = toPath.absolutePath
                 }
-
-                pathList.add(info.path)
             }
+
+            if (needTransCount > 0){
+                runOnUiThread {
+                    toast("视频关键帧过少,需要进行转码")
+                    (activity as AlbumActivity).setEnable(false)
+                    toast("视频转码开始")
+                }
+
+                var offset = 0.0
+                for (set in transMap){
+                    needTransCount --
+                    set.value.audioPath = set.value.path
+                    set.value.path = videoTranscoder(set.key,offset, transMap.size.toDouble(),needTransCount == 0,set.value.duration)
+                    val pathCache = requireContext().getSharedPreferences("path-cache",Context.MODE_PRIVATE)
+                    pathCache.edit().putString(set.value.md5Key,set.value.path).apply()
+                    offset += 100.0 / transMap.size
+                }
+
+                runOnUiThread {
+                    Toast.makeText(requireContext(), "视频转码结束", Toast.LENGTH_SHORT).show()
+                    (activity as AlbumActivity).setEnable(true)
+                }
+
+            }
+//            for (info in mSelectList) {
+//                if (info.type == AlbumItemType.Video){
+//                    val path = info.path
+//                    val mediaInfo = MediaInspector.shared().inspect(path)
+//                    for (index in mediaInfo.streams){
+//                        if (index is MediaInspector.MediaInfo.Video){
+//                            // 目前版本暂时开始视频转码判断
+//                            if (!index.directReverse){
+//
+//                                info.path = videoTranscoder(path)
+//                            } else {
+//                                val toPath = getOutputTempFilePath()
+//                                FileHelper.copyFile(File(path),toPath)
+//                                info.path = toPath.absolutePath
+//                            }
+//                            // 如需关闭视频转码 打开下面的代码,注释上方的代码
+////
+////                            val toPath = getOutputTempFilePath()
+////                            FileHelper.copyFile(File(path),toPath)
+////                            info.path = toPath.absolutePath
+//                        }
+//                    }
+//                } else {
+//
+//                }
+//
+//                pathList.add(info.path)
+//            }
             runOnUiThread {
                 val intent = Intent()
                 val bundle = Bundle()
@@ -231,44 +303,86 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
         return File(TuSdk.getAppTempPath(), String.format("lsq_%s.%s", StringHelper.timeStampString(),suffix))
     }
 
-    private fun videoTranscoder(inputPath: String): String {
+    private fun videoTranscoder(inputPath: String,offset : Double,size : Double,isEnd : Boolean,duration : Int): String {
         val outputPath = getOutputTempFilePath().path
-        val transcoder = Transcoder()
-        transcoder.setListener(object : Producer.Listener {
-            override fun onEvent(state: Producer.State?, ts: Long) {
-                if (state == Producer.State.kWRITING) {
+
+        val videoPreprocessor = VideoPreprocessor()
+        videoPreprocessor.setListener { a, ts ->
+            when(a){
+                VideoPreprocessor.Action.OPEN -> {
+
+                }
+                VideoPreprocessor.Action.CLOSE -> {
+//                    transcoderSemaphore.release()
+                    runOnUiThread {
+                        if (isEnd){
+                            (activity as AlbumActivity).setEnable(true)
+                            lsq_editor_cut_load.setVisibility(View.GONE)
+                            lsq_editor_cut_load_parogress.setValue(0f)
+                        }
+                    }
+                }
+                VideoPreprocessor.Action.START -> {
                     runOnUiThread {
                         lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                        lsq_editor_cut_load_parogress.setValue((ts / transcoder.duration.toFloat()) * 100f)
                     }
-                } else if (state == Producer.State.kEND) {
-                    transcoderSemaphore.release()
+                }
+                VideoPreprocessor.Action.CANCEL -> {
+
+                }
+                VideoPreprocessor.Action.WRITTING -> {
+                    val currentDuration = duration
+                    TLog.e("ts : ${ts}  currentDuration : ${currentDuration}")
                     runOnUiThread {
-                        (activity as AlbumActivity).setEnable(true)
-                        lsq_editor_cut_load.setVisibility(View.GONE)
-                        lsq_editor_cut_load_parogress.setValue(0f)
-                        Toast.makeText(requireContext(), "视频转码结束", Toast.LENGTH_SHORT).show()
+                        lsq_editor_cut_load_parogress.setValue((offset +( (ts / currentDuration.toFloat()) * 100f / size)).toFloat())
                     }
                 }
             }
-
-        })
-
-        val transcoderConfig = Producer.OutputConfig()
-        transcoderConfig.keyint = 1
-        transcoder.setOutputConfig(transcoderConfig)
-
-        if (!transcoder.init(outputPath, inputPath)) {
-            TLog.e("Transcoder Error")
         }
-        transcoder.start()
-        runOnUiThread {
-            (activity as AlbumActivity).setEnable(false)
-            toast("视频转码开始")
-        }
+
+        val processerConfig = VideoPreprocessor.Config()
+        processerConfig.inputPath = inputPath
+        processerConfig.outputPath = outputPath
+        processerConfig.keyint = 0
+
+        videoPreprocessor.open(processerConfig)
+        videoPreprocessor.start()
+
+
+//        val transcoder = Transcoder()
+//        transcoder.setListener(object : Producer.Listener {
+//            override fun onEvent(state: Producer.State?, ts: Long) {
+//                if (state == Producer.State.kWRITING) {
+//                    val currentDuration = transcoder.duration.toFloat()
+//                    runOnUiThread {
+//                        lsq_editor_cut_load.setVisibility(View.VISIBLE)
+//                        lsq_editor_cut_load_parogress.setValue((offset +( (ts / currentDuration) * 100f / size)).toFloat())
+//                    }
+//                } else if (state == Producer.State.kEND) {
+//                    transcoderSemaphore.release()
+//                    runOnUiThread {
+//                        if (isEnd){
+//                            (activity as AlbumActivity).setEnable(true)
+//                            lsq_editor_cut_load.setVisibility(View.GONE)
+//                            lsq_editor_cut_load_parogress.setValue(0f)
+//                        }
+//                    }
+//                }
+//            }
+//
+//        })
+//
+//        val transcoderConfig = Producer.OutputConfig()
+//        transcoderConfig.keyint = 0
+//        transcoder.setOutputConfig(transcoderConfig)
+//
+//        if (!transcoder.init(outputPath, inputPath)) {
+//            TLog.e("Transcoder Error")
+//        }
+//        transcoder.start()
         setCanBackPressed(false)
-        transcoderSemaphore.acquire()
-        transcoder.release()
+//        transcoderSemaphore.acquire()
+        videoPreprocessor.close(true)
         return outputPath
     }
 

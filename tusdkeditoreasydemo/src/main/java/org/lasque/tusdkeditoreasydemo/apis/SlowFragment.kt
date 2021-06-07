@@ -90,7 +90,7 @@ class SlowFragment : BaseFragment(FunctionType.SlowEffect) {
 
         val durationVideoSecond = (mEndTime % 60000 / 1000)
         lsq_editor_current_state.setText("慢动作作用范围 开始时间 : ${currentVideoHour}:$currentVideoMinute:$currentVideoSecond 结束时间 : $durationVideoHour:$durationVideoMinute:$durationVideoSecond \n" +
-                "慢动作倍数 : ${mCurrentStretch - 1}")
+                "慢动作倍数 : ${mCurrentStretch}")
     }
 
     override fun initView(view: View, savedInstanceState: Bundle?) {
@@ -221,7 +221,7 @@ class SlowFragment : BaseFragment(FunctionType.SlowEffect) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        var mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video)
+        var mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video,item.audioPath)
 
         val videoClip = mVideoItem.mVideoClip
         val audioClip = mVideoItem.mAudioClip

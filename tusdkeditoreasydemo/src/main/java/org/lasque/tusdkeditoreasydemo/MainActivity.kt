@@ -3,6 +3,7 @@ package org.lasque.tusdkeditoreasydemo
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
+import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.tusdk.pulse.Engine
@@ -10,10 +11,16 @@ import com.tusdk.pulse.editor.TuVideoClipSDK
 import com.tusdk.pulse.utils.AssetsMapper
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.startActivity
-import org.lasque.tusdkpulse.core.utils.AssetsHelper
 import org.lasque.tusdkeditoreasydemo.base.OnItemClickListener
 import org.lasque.tusdkeditoreasydemo.utils.Constants
 import org.lasque.tusdkeditoreasydemo.utils.PermissionUtils
+import org.lasque.tusdkpulse.core.TuSdkContext
+import org.lasque.tusdkpulse.core.listener.TuSdkOrientationEventListener
+import org.lasque.tusdkpulse.core.utils.ContextUtils
+import org.lasque.tusdkpulse.core.utils.TLog
+import org.lasque.tusdkpulse.core.utils.ThreadHelper
+import org.lasque.tusdkpulse.core.view.TuSdkViewHelper
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +56,10 @@ class MainActivity : AppCompatActivity() {
             FunctionType.SceneEffect,
             FunctionType.ParticleEffect,
             FunctionType.Text,
+            FunctionType.Bubble,
+            FunctionType.Graffiti,
+            FunctionType.Freeze,
+            FunctionType.Mosaic,
             FunctionType.DraftList
     )
 
@@ -68,7 +79,17 @@ class MainActivity : AppCompatActivity() {
         if (!sp.contains(Constants.TTF_KEY)){
             val assetsMapper = AssetsMapper(this)
             val path = assetsMapper.mapAsset("SourceHanSansSC-Normal.ttf")
-            sp.edit().putString(Constants.TTF_KEY,path).commit()
+            sp.edit().putString(Constants.TTF_KEY,path).apply()
+        }
+
+        val ttfPath = sp.getString(Constants.TTF_KEY,"")
+        if (!TextUtils.isEmpty(ttfPath)){
+            val ttfFile = File(ttfPath)
+            if (!ttfFile.exists()){
+                val assetsMapper = AssetsMapper(this)
+                val path = assetsMapper.mapAsset("SourceHanSansSC-Normal.ttf")
+                sp.edit().putString(Constants.TTF_KEY,path).apply()
+            }
         }
 
 
@@ -88,6 +109,15 @@ class MainActivity : AppCompatActivity() {
                     FunctionType.DraftList->{
                         startActivity<DraftActivity>()
                     }
+                    FunctionType.Bubble->{
+                        startActivity<BubbleTextActivity>()
+                    }
+                    FunctionType.Graffiti->{
+                        startActivity<GraffitiActivity>()
+                    }
+                    FunctionType.Mosaic->{
+                        startActivity<MosaicActivity>()
+                    }
                     else -> {
                         startActivity<ApiActivity>("function" to item)
                     }
@@ -99,8 +129,104 @@ class MainActivity : AppCompatActivity() {
         lsq_api_list.layoutManager = layoutManager
         lsq_api_list.adapter = adapter
 
+
+
         val mEngine = Engine.getInstance()
         mEngine.init(null)
+//        mEngine.setLogLevel(-1)
+
+        ThreadHelper.runThread {
+            val sp = TuSdkContext.context().getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
+            val assetsMapper = AssetsMapper(TuSdkContext.context())
+            if (!sp.contains(Constants.BUBBLE_TTF_KEY)) {
+                assetsMapper.mapAsset("AliHYAiHei.ttf")
+                assetsMapper.mapAsset("NotoColorEmoji.ttf")
+                assetsMapper.mapAsset("SOURCEHANSANSCN-LIGHT.OTF")
+                assetsMapper.mapAsset("SOURCEHANSANSCN-REGULAR.OTF")
+                assetsMapper.mapAsset("站酷快乐体2016修订版_0.ttf")
+                val path = TuSdkContext.context().externalCacheDirs[0].absolutePath + "/assets"
+                sp.edit().putString(Constants.BUBBLE_TTF_KEY, path).apply()
+            }
+            if (!sp.contains(Constants.BUBBLE_5)) {
+                val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
+                sp.edit().putString(Constants.BUBBLE_5, path).apply()
+            } else {
+                val path = sp.getString(Constants.BUBBLE_5,"")
+                val file = File(path)
+                if (TextUtils.isEmpty(path) || !file.exists()){
+                    val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
+                    sp.edit().putString(Constants.BUBBLE_5, path).apply()
+                }
+            }
+            if (!sp.contains(Constants.BUBBLE_6)) {
+                val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
+                sp.edit().putString(Constants.BUBBLE_6, path).apply()
+            } else {
+                val path = sp.getString(Constants.BUBBLE_6,"")
+                val file = File(path)
+                if (TextUtils.isEmpty(path) || !file.exists()){
+                    val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
+                    sp.edit().putString(Constants.BUBBLE_6, path).apply()
+                }
+            }
+            if (!sp.contains(Constants.BUBBLE_7)) {
+                val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
+                sp.edit().putString(Constants.BUBBLE_7, path).apply()
+            } else {
+                val path = sp.getString(Constants.BUBBLE_7,"")
+                val file = File(path)
+                if (TextUtils.isEmpty(path) || !file.exists()){
+                    val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
+                    sp.edit().putString(Constants.BUBBLE_7, path).apply()
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 授予权限的结果，在对话结束后调用
+     *
+     * @param permissionGranted
+     * true or false, 用户是否授予相应权限
+     */
+    protected var mGrantedResultDelgate: PermissionUtils.GrantedResultDelgate = object : PermissionUtils.GrantedResultDelgate {
+        override fun onPermissionGrantedResult(permissionGranted: Boolean) {
+            if (permissionGranted) {
+                ThreadHelper.runThread {
+                    val sp = TuSdkContext.context().getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
+                    val assetsMapper = AssetsMapper(TuSdkContext.context())
+                    if (!sp.contains(Constants.BUBBLE_TTF_KEY)) {
+                        assetsMapper.mapAsset("AliHYAiHei.ttf")
+                        assetsMapper.mapAsset("NotoColorEmoji.ttf")
+                        assetsMapper.mapAsset("SOURCEHANSANSCN-LIGHT.OTF")
+                        assetsMapper.mapAsset("SOURCEHANSANSCN-REGULAR.OTF")
+                        assetsMapper.mapAsset("站酷快乐体2016修订版_0.ttf")
+                        val path = TuSdkContext.context().externalCacheDirs[0].absolutePath + "/assets"
+                        sp.edit().putString(Constants.BUBBLE_TTF_KEY, path).apply()
+                    }
+                    if (!sp.contains(Constants.BUBBLE_5)) {
+                        val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
+                        sp.edit().putString(Constants.BUBBLE_5, path).apply()
+                    }
+                    if (!sp.contains(Constants.BUBBLE_6)) {
+                        val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
+                        sp.edit().putString(Constants.BUBBLE_6, path).apply()
+                    }
+                    if (!sp.contains(Constants.BUBBLE_7)) {
+                        val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
+                        sp.edit().putString(Constants.BUBBLE_7, path).apply()
+                    }
+                }
+            } else {
+
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        PermissionUtils.handleRequestPermissionsResult(requestCode, permissions, grantResults, this, mGrantedResultDelgate)
     }
 
     override fun onDestroy() {

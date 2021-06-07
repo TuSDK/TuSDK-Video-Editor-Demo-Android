@@ -95,7 +95,7 @@ public class TransitionsFragment : BaseFragment() {
                             refreshEditor()
                             playerUnlock()
                             var targetPos = mClipList[0].videoClip.streamInfo.duration
-                            mEditor!!.player.seekTo(targetPos - 3000)
+                            mEditor!!.player.seekTo(max(targetPos - 3000,0))
                             mOnPlayerStateUpdateListener?.onPlayerPlay()
 
                         }
@@ -131,11 +131,11 @@ public class TransitionsFragment : BaseFragment() {
 
                             val audioTransitions = mCurrentAudioTransition!!
                             audioTransitions.duration = Math.max(0,mCurrentTransitionsDuration - 100)
-//                            mAudioLayer!!.setTransition(mClipList[1].mId.toInt(), audioTransitions)
+                            mAudioLayer!!.setTransition(mClipList[1].mId.toInt(), audioTransitions)
                             refreshEditor()
                             playerUnlock()
                             var targetPos = mClipList[0].videoClip.streamInfo.duration
-                            mEditor!!.player.seekTo(targetPos - 3000)
+                            mEditor!!.player.seekTo(max(targetPos - 3000,0))
                             mOnPlayerStateUpdateListener?.onPlayerPlay()
                         }
                     }
@@ -143,11 +143,15 @@ public class TransitionsFragment : BaseFragment() {
                 })
 
                 if (isRestore){
-                    val transition = mVideoLayer!!.getTransition(mClipList[1].mId.toInt())
-                    mCurrentTransitionsDuration = transition.duration
-                    transitionsAdapter.findTransitions(transition.name)
-                    lsq_transitions_duration.progress = (transition.duration / 100L).toInt()
+                    val transition : ClipLayer.Transition? = mVideoLayer!!.getTransition(mClipList[1].mId.toInt())
+                    if (transition != null){
+                        mCurrentTransitionsDuration = transition.duration + 100
+                        transitionsAdapter.findTransitions(transition.name)
+                    }
+
                 }
+                lsq_transitions_duration.progress = (((mCurrentTransitionsDuration / 1000L)) - 1).toInt()
+
             }
         }
     }
@@ -169,6 +173,10 @@ public class TransitionsFragment : BaseFragment() {
             mClipList.add(VideoItem(path, key.toLong(),videoClip, audioClip))
         }
 
+        val trans : ClipLayer.Transition? = videoLayer.getTransition(mClipList[1]!!.mId.toInt())
+        if (trans != null)
+            mCurrentTransitionsDuration = trans.duration + 100
+
         mVideoLayer = videoLayer
         mAudioLayer = audioLayer
 
@@ -177,7 +185,7 @@ public class TransitionsFragment : BaseFragment() {
 
     private fun initLayer() {
         for (item in mVideoList!!) {
-            mClipList.add(VideoItem.createVideoItem(item.path, mEditor!!,true,item.type == AlbumItemType.Video))
+            mClipList.add(VideoItem.createVideoItem(item.path, mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath))
         }
 
         val videoLayer = ClipLayer(mEditor!!.context, true)

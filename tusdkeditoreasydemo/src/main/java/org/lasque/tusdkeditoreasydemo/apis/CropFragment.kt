@@ -165,7 +165,7 @@ class CropFragment : BaseFragment(FunctionType.Crop) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
 
 
         val duration = mVideoItem!!.mVideoClip.streamInfo.duration

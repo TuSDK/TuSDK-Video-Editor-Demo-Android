@@ -45,6 +45,7 @@ import org.lasque.tusdkeditoreasydemo.album.AlbumActivity
 import org.lasque.tusdkeditoreasydemo.album.AlbumInfo
 import org.lasque.tusdkeditoreasydemo.apis.*
 import org.lasque.tusdkeditoreasydemo.base.*
+import org.lasque.tusdkpulse.core.utils.FileHelper
 import java.io.File
 import java.lang.Math.ceil
 import java.util.*
@@ -91,7 +92,7 @@ class ApiActivity : BaseActivity() {
     private var mPlayerStateUpdateListener = object : OnPlayerStateUpdateListener {
         override fun onDurationUpdate() {
             runOnUiThread {
-                TLog.e("duration ${mPlayer!!.duration}")
+//                TLog.e("duration ${mPlayer!!.duration}")
                 seekBar.max = mPlayer!!.duration.toInt()
                 refreshDuration(mPlayerContext.currentFrame)
             }
@@ -147,10 +148,10 @@ class ApiActivity : BaseActivity() {
                 mCurrentFragment = MovieCutFragment()
             }
             FunctionType.VideoStitching -> {
-                mCurrentFragment = VideoStitchingFragment()
+                mCurrentFragment = VideoStitchingFragment(FunctionType.VideoStitching)
             }
             FunctionType.VideoImageStitching -> {
-                mCurrentFragment = VideoStitchingFragment()
+                mCurrentFragment = VideoStitchingFragment(FunctionType.VideoImageStitching)
             }
             FunctionType.ImageStitching -> {
                 mCurrentFragment = ImageStitchingFragment()
@@ -209,6 +210,9 @@ class ApiActivity : BaseActivity() {
             }
             FunctionType.AudioPitch->{
                 mCurrentFragment = AudioPitchFragment()
+            }
+            FunctionType.Freeze->{
+                mCurrentFragment = FreezeFragment()
             }
         }
         mCurrentFragment?.setCurrentThreadPool(mEvaThreadPool)
@@ -276,6 +280,7 @@ class ApiActivity : BaseActivity() {
 
         mCurrentFuncType = intent.extras!!["function"] as FunctionType
         lsq_title.setText(mCurrentFuncType.mTitleId)
+
         if (TextUtils.isEmpty(modelPath)){
             when (mCurrentFuncType) {
                 FunctionType.Null -> {
@@ -339,12 +344,16 @@ class ApiActivity : BaseActivity() {
                     openAlbum(1, false, false)
                 }
                 FunctionType.CanvasBackgroundType -> {
+                    lsq_api_panel_scroll.isNestedScrollingEnabled = false
                     openAlbum(1, false, false)
                 }
                 FunctionType.VideoSegmentation -> {
                     openAlbum(1, false, true)
                 }
                 FunctionType.AudioPitch -> {
+                    openAlbum(1, false, true)
+                }
+                FunctionType.Freeze->{
                     openAlbum(1, false, true)
                 }
             }
@@ -415,13 +424,21 @@ class ApiActivity : BaseActivity() {
         }
     }
 
+    private var mCurrentProducer : VideoEditor.Producer? = null
+
+    private var mCurrentSavePath = ""
+
+    private var isNeedSave = true
+
     private fun saveVideo() {
         mEvaThreadPool.execute {
+            isNeedSave = true
             val producer = mEditor.newProducer()
     //                val outputFilePath = "${TuSdkContext.context().getExternalFilesDir(DIRECTORY_DCIM)!!.absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
 
             val outputFilePath = "${Environment.getExternalStoragePublicDirectory(DIRECTORY_DCIM).absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
             TLog.e("output path $outputFilePath")
+            mCurrentSavePath = outputFilePath
 
             val config = Producer.OutputConfig()
             config.watermark = BitmapHelper.getRawBitmap(this, R.raw.sample_watermark)
@@ -431,10 +448,10 @@ class ApiActivity : BaseActivity() {
             producer.setListener { state, ts ->
                 if (state == Producer.State.kEND) {
                     mEvaThreadPool.execute {
-                        producer.cancel()
                         producer.release()
                         mEditor!!.resetProducer()
                         mPlayer!!.seekTo(mPlayerContext.currentFrame)
+                        mCurrentProducer = null
                     }
                     val contentValue = ImageSqlHelper.getCommonContentValues()
                     sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(outputFilePath))))
@@ -442,12 +459,14 @@ class ApiActivity : BaseActivity() {
                         setEnable(true)
                         lsq_editor_cut_load.setVisibility(View.GONE)
                         lsq_editor_cut_load_parogress.setValue(0f)
-                        Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
+                        if (isNeedSave)
+                            Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
                     }
                 } else if (state == Producer.State.kWRITING) {
+                    val currentP = (ts / producer.duration.toFloat()) * 100f
                     runOnUiThread {
                         lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                        lsq_editor_cut_load_parogress.setValue((ts / producer.duration.toFloat()) * 100f)
+                        lsq_editor_cut_load_parogress.setValue(currentP)
                     }
                 }
             }
@@ -460,6 +479,7 @@ class ApiActivity : BaseActivity() {
                 TLog.e("[Error] EditorProducer Start failed")
 
             }
+            mCurrentProducer = producer
         }
     }
 
@@ -485,8 +505,9 @@ class ApiActivity : BaseActivity() {
                 mCurrentState = state
                 mPlayerContext.state = state
                 if (state == Player.State.kDO_PLAY) {
+                    val durationMS = mPlayer!!.duration
                     runOnUiThread {
-                        val durationMS = mPlayer!!.duration
+
                         seekBar.max = durationMS.toInt()
                     }
                 } else if (state == Player.State.kEOS) {
@@ -580,7 +601,7 @@ class ApiActivity : BaseActivity() {
         super.onResume()
 
         if (!Engine.getInstance().checkEGL()) {
-            //throw Exception("dsssssssssssssssss");
+            throw Exception("dsssssssssssssssss");
         } else {
             mEvaThreadPool?.execute { mPlayerContext.refreshFrame() }
         }
@@ -594,6 +615,13 @@ class ApiActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
         mEvaThreadPool.execute {
+            if (mCurrentProducer != null){
+                isNeedSave = false
+                mCurrentProducer?.cancel()
+                FileHelper.delete(File(mCurrentSavePath))
+                mCurrentProducer = null
+            }
+
             mPlayer?.pause()
             runOnUiThread {
 //                lsq_editor_play.visibility = View.VISIBLE
@@ -610,7 +638,6 @@ class ApiActivity : BaseActivity() {
             lsq_api_displayView.release()
 
             mPlayer?.close()
-            TLog.e("release")
             mEditor.destroy()
             mEvaThreadPool.shutdownNow()
 

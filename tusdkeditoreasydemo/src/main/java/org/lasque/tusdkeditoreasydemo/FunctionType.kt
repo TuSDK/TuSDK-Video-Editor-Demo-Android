@@ -34,6 +34,7 @@ enum class FunctionType(titleId : Int) {
     ImageWithImage(R.string.lsq_function_image_with_image),
     ImageWithVideo(R.string.lsq_function_image_with_video),
     Text(R.string.lsq_function_text),
+    Bubble(R.string.lsq_function_bubble),
     Cover(R.string.lsq_function_cover),
     Speed(R.string.lsq_function_speed),
     MoiveCut(R.string.lsq_function_movie_cuter),
@@ -42,7 +43,10 @@ enum class FunctionType(titleId : Int) {
     Transform(R.string.lsq_function_transform),
     CanvasBackgroundType(R.string.lsq_function_canvas_background),
     DraftList(R.string.lsq_function_draft_list),
-    AudioPitch(R.string.lsq_function_audio_patch)
+    AudioPitch(R.string.lsq_function_audio_patch),
+    Graffiti(R.string.lsq_function_graffiti),
+    Freeze(R.string.lsq_function_freeze),
+    Mosaic(R.string.lsq_function_mosaic)
     ;
 
     val mTitleId : Int = titleId

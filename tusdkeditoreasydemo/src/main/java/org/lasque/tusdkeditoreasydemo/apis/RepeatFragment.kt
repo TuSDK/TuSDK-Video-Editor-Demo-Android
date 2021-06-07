@@ -139,7 +139,9 @@ class RepeatFragment : BaseFragment(FunctionType.RepeatEffect) {
                 mEndTime = 0
             }
 
-            mMaxDuration = mVideoClip!!.streamInfo.duration
+            val videoPath = mVideoClip!!.config.getString(VideoFileClip.CONFIG_PATH)
+//            mMaxDuration = MediaInspector.shared().inspect(videoPath).streams[0].duration
+            mMaxDuration = mVideoClip!!.originStreamInfo.duration
 
             runOnUiThread {
                 setCurrentState()
@@ -238,7 +240,7 @@ class RepeatFragment : BaseFragment(FunctionType.RepeatEffect) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
         val videoClip = mVideoItem!!.mVideoClip
         val audioClip = mVideoItem!!.mAudioClip
 

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="@color/lsq_editor_panel_bg">
+
+    <include
+        android:id="@+id/lsq_title_layer"
+        layout="@layout/include_title_layer"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lsq_mosaic_menu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <Button
+            android:id="@+id/lsq_mosaic_back_to_main"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="返回"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+            android:id="@+id/lsq_mosaic_rect"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="矩形框"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@id/lsq_mosaic_back_to_main"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+            android:id="@+id/lsq_mosaic_path"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="笔触"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@id/lsq_mosaic_rect"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+            android:id="@+id/lsq_mosaic_reset"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="撤销"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@id/lsq_mosaic_path"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <RelativeLayout
+        android:id="@+id/lsq_mosaic_layer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_displayView"
+        app:layout_constraintLeft_toLeftOf="@id/lsq_mosaic_displayView"
+        app:layout_constraintRight_toRightOf="@id/lsq_mosaic_displayView"
+        app:layout_constraintTop_toTopOf="@id/lsq_mosaic_displayView" />
+
+    <com.tusdk.pulse.DisplayView
+        android:id="@+id/lsq_mosaic_displayView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_title_layer" />
+
+    <org.lasque.tusdkeditoreasydemo.base.views.EffectLayerView
+        android:id="@+id/lsq_effect_layer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_displayView"
+        app:layout_constraintLeft_toLeftOf="@id/lsq_mosaic_displayView"
+        app:layout_constraintRight_toRightOf="@id/lsq_mosaic_displayView"
+        app:layout_constraintTop_toTopOf="@id/lsq_mosaic_displayView" />
+
+    <ImageView
+        android:id="@+id/lsq_mosaic_play"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@mipmap/edit_ic_play"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_mosaic_displayView" />
+
+
+    <TextView
+        android:id="@+id/lsq_player_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:gravity="center"
+        android:text="00:00/00:00"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_play"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lsq_mosaic_play" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="30dp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_play"
+        app:layout_constraintLeft_toRightOf="@id/lsq_mosaic_play"
+        app:layout_constraintRight_toLeftOf="@id/lsq_player_duration"
+        app:layout_constraintTop_toTopOf="@id/lsq_mosaic_play" />
+
+    <TextView
+        android:id="@+id/lsq_mosaic_duration_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:text="持续时长:"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_mosaic_play" />
+
+    <cn.bar.DoubleHeadedDragonBar
+        android:id="@+id/lsq_mosaic_duration"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="14dp"
+        app:bg_color="@color/lsq_color_api_gray"
+        app:button_height="30dp"
+        app:button_img="@mipmap/sel_ic"
+        app:button_width="30dp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_duration_title"
+        app:layout_constraintLeft_toRightOf="@id/lsq_mosaic_duration_title"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lsq_mosaic_duration_title"
+        app:seek_height="4dp"
+        app:value_color="@color/lsq_seek_value_color" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lsq_mosaic_path_layer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/lsq_mosaic_menu"
+        app:layout_constraintLeft_toLeftOf="@id/lsq_mosaic_duration_title"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_mosaic_duration_title">
+
+        <TextView
+
+            android:id="@+id/lsq_mosaic_thickness_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="笔触宽度:"
+            android:textColor="@color/white"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <SeekBar
+
+            android:id="@+id/lsq_mosaic_thickness_bar"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:max="20"
+            android:maxHeight="4dp"
+            android:min="0"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:progress="10"
+            android:thumb="@drawable/lsq_model_seekbar_thumb"
+            android:thumbOffset="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_thickness_title"
+            app:layout_constraintLeft_toRightOf="@id/lsq_mosaic_thickness_title"
+            app:layout_constraintTop_toTopOf="@id/lsq_mosaic_thickness_title"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.8" />
+
+        <Button
+            android:id="@+id/lsq_mosaic_fill"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/blue_background"
+            android:text="马赛克"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/lsq_mosaic_eraser"
+            app:layout_constraintTop_toBottomOf="@id/lsq_mosaic_thickness_title"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.45" />
+
+        <Button
+            android:id="@+id/lsq_mosaic_eraser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/gray_background"
+            android:text="橡皮擦"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/lsq_mosaic_fill"
+            app:layout_constraintLeft_toRightOf="@id/lsq_mosaic_fill"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/lsq_mosaic_fill"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.45" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/lsq_editor_cut_load"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        android:background="@color/lsq_alpha_black_7f"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <at.grabner.circleprogress.CircleProgressView
+            android:id="@+id/lsq_editor_cut_load_parogress"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            app:cpv_barColor="@color/lsq_color_white"
+            app:cpv_barWidth="2dp"
+            app:cpv_maxValue="100"
+            app:cpv_rimColor="@color/lsq_color_transparent"
+            app:cpv_rimWidth="2dp"
+            app:cpv_textColor="@color/lsq_color_transparent" />
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

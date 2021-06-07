@@ -22,7 +22,7 @@ import org.lasque.tusdkeditoreasydemo.FunctionType
  * @Copyright    (c) 2020 tusdk.com. All rights reserved.
  *
  */
-class DraftItem {
+class DraftItem : Comparable<DraftItem>{
 
     companion object {
         const val Draft_List_Key ="d-list-key"
@@ -33,12 +33,18 @@ class DraftItem {
     val draftPath : String
     val saveDate : String
     val fileName : String
+    val saveTimestamp : Long
 
-    constructor(type: Int,path : String,time : String,name : String){
+    constructor(type: Int,path : String,time : String,name : String,timeStamp : Long = System.currentTimeMillis()){
         funcType = type
         draftPath = path
         saveDate = time
         fileName = name
+        saveTimestamp = timeStamp
+    }
+
+    override fun compareTo(other: DraftItem): Int {
+        return (saveTimestamp - other.saveTimestamp).toInt()
     }
 
 

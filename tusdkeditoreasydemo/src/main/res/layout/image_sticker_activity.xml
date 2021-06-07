@@ -15,12 +15,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
-        app:layout_constraintHeight_default="percent"
-        app:layout_constraintHeight_percent="0.5"
         android:id="@+id/lsq_display_view"
         layout="@layout/include_sticker_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lsq_title_layer" />
@@ -32,10 +32,29 @@
         android:layout_marginTop="10dp"
         android:src="@mipmap/edit_ic_play"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lsq_display_view" />
 
+    <TextView
+        android:id="@+id/lsq_player_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:gravity="center"
+        android:text="00:00/00:00"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_sticker_play"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lsq_sticker_play" />
 
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="30dp"
+        app:layout_constraintBottom_toBottomOf="@id/lsq_sticker_play"
+        app:layout_constraintLeft_toRightOf="@id/lsq_sticker_play"
+        app:layout_constraintRight_toLeftOf="@id/lsq_player_duration"
+        app:layout_constraintTop_toTopOf="@id/lsq_sticker_play" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
@@ -49,6 +68,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <Button
                 android:id="@+id/lsq_add_image"
                 android:layout_width="match_parent"
@@ -59,11 +79,12 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent" />
+
             <include
-                android:layout_width="0dp"
-                android:layout_height="0dp"
                 android:id="@+id/lsq_image_function_layer"
                 layout="@layout/include_image_function_layout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
                 app:layout_constraintBottom_toTopOf="@id/lsq_add_image"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
@@ -79,23 +100,22 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <include
-                android:visibility="gone"
                 android:id="@+id/lsq_image_blend_layer"
                 layout="@layout/include_image_blend_layout"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/lsq_add_image"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <include
-                android:visibility="gone"
                 android:id="@+id/lsq_image_list_layer"
                 layout="@layout/include_image_layer_list_layout"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/lsq_add_image"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,11 +34,16 @@
     <string name="lsq_function_canvas_background">视频背景</string>
     <string name="lsq_function_audio_patch">音频变声</string>
     <string name="lsq_function_draft_list">草稿箱</string>
+    <string name="lsq_function_bubble">气泡文字</string>
+    <string name="lsq_function_graffiti">涂鸦</string>
+    <string name="lsq_function_freeze">视频定格</string>
+    <string name="lsq_function_mosaic">马赛克</string>
 
     <!-- 混合模式 -->
     <string name="lsq_filter_normal">正常</string>
     <string name="lsq_filter_add">相加</string>
-    <string name="lsq_filter_substract">减去</string>
+    <string name="lsq_filter_overlay">叠加</string>
+    <string name="lsq_filter_subtract">减去</string>
     <string name="lsq_filter_negation">反色</string>
     <string name="lsq_filter_average">均值</string>
     <string name="lsq_filter_multiply">正片叠底</string>
@@ -46,6 +51,8 @@
     <string name="lsq_filter_screen">滤色</string>
     <string name="lsq_filter_softlight">柔光</string>
     <string name="lsq_filter_hardlight">强光</string>
+    <string name="lsq_filter_linearlight">线性光</string>
+    <string name="lsq_filter_pinlight">点光</string>
     <string name="lsq_filter_lighten">变亮</string>
     <string name="lsq_filter_darken">变暗</string>
     <string name="lsq_filter_reflect">反射</string>
@@ -182,6 +189,8 @@
     <string name="lsq_editor_text_size">字号</string>
     <string name="lsq_editor_text_font">字体</string>
     <string name="lsq_editor_text_blend">混合模式</string>
+    <string name="lsq_editor_text_anitext">动画</string>
+    <string name="lsq_editor_text_shadow">阴影</string>
 
 
     <!--    4.0.0新滤镜    -->
@@ -271,5 +280,102 @@
     <string name="lsq_uncle">大叔</string>
     <string name="lsq_girl">女生</string>
     <string name="lsq_lolita">萝莉</string>
+    
+
+    <!-- 文字动画 in -->
+    <string name="lsq_anitext_name_0">无</string>
+    <string name="lsq_anitext_name_1">模糊</string>
+    <string name="lsq_anitext_name_2">波浪弹入</string>
+    <string name="lsq_anitext_name_3">螺旋上升</string>
+    <string name="lsq_anitext_name_4">收拢</string>
+    <string name="lsq_anitext_name_5">弹弓</string>
+    <string name="lsq_anitext_name_6">空翻</string>
+    <string name="lsq_anitext_name_7">弹性伸缩</string>
+    <string name="lsq_anitext_name_8">弹簧</string>
+    <string name="lsq_anitext_name_9">渐显</string>
+    <string name="lsq_anitext_name_10">生长</string>
+    <string name="lsq_anitext_name_11">轻微放大</string>
+    <string name="lsq_anitext_name_12">缩小</string>
+    <string name="lsq_anitext_name_13">放大</string>
+    <string name="lsq_anitext_name_14">随机飞入</string>
+    <string name="lsq_anitext_name_15">旋入</string>
+    <string name="lsq_anitext_name_16">旋转飞入</string>
+    <string name="lsq_anitext_name_17">打字机1</string>
+    <string name="lsq_anitext_name_18">打字机2</string>
+    <string name="lsq_anitext_name_19">打字机3</string>
+    <string name="lsq_anitext_name_20">向左移动</string>
+    <string name="lsq_anitext_name_21">向右移动</string>
+    <string name="lsq_anitext_name_22">向上移动</string>
+    <string name="lsq_anitext_name_23">向下移动</string>
+    <string name="lsq_anitext_name_24">向左擦除</string>
+    <string name="lsq_anitext_name_25">向右擦除</string>
+    <string name="lsq_anitext_name_26">向上擦除</string>
+    <string name="lsq_anitext_name_27">向下擦除</string>
+    <string name="lsq_anitext_name_28">羽化向左擦开</string>
+    <string name="lsq_anitext_name_29">羽化向右擦开</string>
+    <string name="lsq_anitext_name_30">开幕</string>
+    <string name="lsq_anitext_name_31">羽化竖直线性擦除</string>
+    <string name="lsq_anitext_name_32">向左辐射擦除</string>
+    <string name="lsq_anitext_name_33">向右辐射擦除</string>
+    <string name="lsq_anitext_name_34">弹入</string>
+    <string name="lsq_anitext_name_84">爱心弹跳</string>
+    <string name="lsq_anitext_name_85">音符弹跳</string>
+
+
+    <!-- 文字动画 out -->
+    <string name="lsq_anitext_name_35">模糊</string>
+    <string name="lsq_anitext_name_36">波浪弹出</string>
+    <string name="lsq_anitext_name_37">螺旋下降</string>
+    <string name="lsq_anitext_name_38">展开</string>
+    <string name="lsq_anitext_name_39">弹弓</string>
+    <string name="lsq_anitext_name_40">空翻</string>
+    <string name="lsq_anitext_name_41">弹性伸缩</string>
+    <string name="lsq_anitext_name_42">弹簧</string>
+    <string name="lsq_anitext_name_43">渐隐</string>
+    <string name="lsq_anitext_name_44">生长</string>
+    <string name="lsq_anitext_name_45">轻微放大</string>
+    <string name="lsq_anitext_name_46">缩小</string>
+    <string name="lsq_anitext_name_47">放大</string>
+    <string name="lsq_anitext_name_48">随机飞出</string>
+    <string name="lsq_anitext_name_49">旋出</string>
+    <string name="lsq_anitext_name_50">旋转飞出</string>
+    <string name="lsq_anitext_name_51">打字机1</string>
+    <string name="lsq_anitext_name_52">打字机2</string>
+    <string name="lsq_anitext_name_53">打字机3</string>
+    <string name="lsq_anitext_name_54">向左移动</string>
+    <string name="lsq_anitext_name_55">向右移动</string>
+    <string name="lsq_anitext_name_56">向上移动</string>
+    <string name="lsq_anitext_name_57">向下移动</string>
+    <string name="lsq_anitext_name_58">向左擦除</string>
+    <string name="lsq_anitext_name_59">向右擦除</string>
+    <string name="lsq_anitext_name_60">向上擦除</string>
+    <string name="lsq_anitext_name_61">向下擦除</string>
+    <string name="lsq_anitext_name_62">羽化向左擦开</string>
+    <string name="lsq_anitext_name_63">羽化向右擦开</string>
+    <string name="lsq_anitext_name_64">闭幕</string>
+    <string name="lsq_anitext_name_65">羽化竖直线性擦除</string>
+    <string name="lsq_anitext_name_66">向左辐射擦除</string>
+    <string name="lsq_anitext_name_67">向右辐射擦除</string>
+    <string name="lsq_anitext_name_68">弹出</string>
+
+
+    <!-- 文字动画 overall -->
+    <string name="lsq_anitext_name_69">水平翻转</string>
+    <string name="lsq_anitext_name_70">垂直翻转</string>
+    <string name="lsq_anitext_name_71">弹幕</string>
+    <string name="lsq_anitext_name_72">字幕</string>
+    <string name="lsq_anitext_name_73">摇摆</string>
+    <string name="lsq_anitext_name_74">钟摆</string>
+    <string name="lsq_anitext_name_75">雨刷</string>
+    <string name="lsq_anitext_name_76">调皮</string>
+    <string name="lsq_anitext_name_77">逐字放大</string>
+    <string name="lsq_anitext_name_78">心跳</string>
+    <string name="lsq_anitext_name_79">故障闪动</string>
+    <string name="lsq_anitext_name_80">闪烁</string>
+    <string name="lsq_anitext_name_81">摇荡</string>
+    <string name="lsq_anitext_name_82">颤抖</string>
+    <string name="lsq_anitext_name_83">跳动</string>
+
+
 
 </resources>

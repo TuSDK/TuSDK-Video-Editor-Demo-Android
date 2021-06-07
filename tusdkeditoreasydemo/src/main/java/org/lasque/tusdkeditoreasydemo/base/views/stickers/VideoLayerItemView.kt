@@ -181,6 +181,8 @@ public class VideoLayerItemView : LayerItemViewBase {
 
     private var mCurrentPath: String = ""
 
+    private var mCurrentAudioPath : String = ""
+
     private var mNeedAudio = true
     override fun restoreClip(layer: ClipLayer) {
         val videoClip = layer.getClip(Video_CLIP_ID)
@@ -193,6 +195,8 @@ public class VideoLayerItemView : LayerItemViewBase {
         val audioClip = audioLayer.getClip(Video_CLIP_ID)
         val audioClipConfig = audioClip.config
 
+        mCurrentAudioPath = audioClipConfig.getString(AudioFileClip.CONFIG_PATH)
+
         mCurrentClip = videoClip
         mCurrentClipConfig = videoClipConfig
 
@@ -200,6 +204,9 @@ public class VideoLayerItemView : LayerItemViewBase {
         mCurrentAudioClipConfig = audioClipConfig
         mCurrentAudioLayer = audioLayer
         mCurrentAudioLayerConfig = audioLayerConfig
+
+        mClipStartPos = videoClip.config.getIntNumberOr(VideoFileClip.CONFIG_TRIM_START,0)
+        mClipEndPos = videoClip.config.getIntNumberOr(VideoFileClip.CONFIG_TRIM_DURATION,videoClip.streamInfo.duration)
     }
 
     override fun restoreLayer(id: Int) {
@@ -223,11 +230,15 @@ public class VideoLayerItemView : LayerItemViewBase {
         mCurrentClip = videoClip
         mCurrentClipConfig = videoClipConfig
 
+        mClipStartPos = 0
+        mClipEndPos = mCurrentClip!!.streamInfo.duration
+        mClipMaxDuration = mCurrentClip!!.streamInfo.duration
+
 
         if (mNeedAudio){
             val audioClip = Clip(mEditor!!.context,AudioFileClip.TYPE_NAME)
             val audioConfig = Config()
-            audioConfig.setString(AudioFileClip.CONFIG_PATH,mCurrentPath)
+            audioConfig.setString(AudioFileClip.CONFIG_PATH,mCurrentAudioPath)
 //            audioConfig.setNumber(AudioFileClip.CONFIG_TRIM_DURATION, mClipDuration)
             audioClip.setConfig(audioConfig)
 
@@ -248,20 +259,20 @@ public class VideoLayerItemView : LayerItemViewBase {
     override fun setClipDuration(start: Long, end: Long) {
 
         mClipDuration = end - start
-        mLayerStartPos = start
-        mLayerEndPos = end
+        mLayerEndPos = mLayerStartPos + mClipDuration
+        mClipStartPos = start
+        mClipEndPos = end
         mEditor!!.player?.lock()
         if (mClipDuration != 0L){
+            mCurrentClipConfig?.setNumber(VideoFileClip.CONFIG_TRIM_START,mClipStartPos)
             mCurrentClipConfig?.setNumber(VideoFileClip.CONFIG_TRIM_DURATION, mClipDuration)
             mCurrentClip?.setConfig(mCurrentClipConfig)
         }
-        mCurrentLayerConfig?.setNumber(Layer.CONFIG_START_POS, start)
-        mCurrentLayer?.setConfig(mCurrentLayerConfig)
+
         if (mNeedAudio){
+            mCurrentAudioClipConfig?.setNumber(AudioFileClip.CONFIG_TRIM_START,mClipStartPos)
             mCurrentAudioClipConfig?.setNumber(AudioFileClip.CONFIG_TRIM_DURATION,mClipDuration)
             mCurrentAudioClip?.setConfig(mCurrentAudioClipConfig)
-            mCurrentAudioLayerConfig?.setNumber(Layer.CONFIG_START_POS,start)
-            mCurrentAudioLayer?.setConfig(mCurrentAudioLayerConfig)
         }
         if (!mEditor!!.build()) {
             TLog.e("Editor reBuild failed")
@@ -271,9 +282,34 @@ public class VideoLayerItemView : LayerItemViewBase {
 
     }
 
+    override fun setLayerStartPos(start: Long) {
+        mLayerStartPos = start
+        mLayerEndPos = mLayerStartPos + mClipDuration
+
+        mEditor!!.player?.lock()
+
+        mCurrentLayerConfig?.setNumber(Layer.CONFIG_START_POS,mLayerStartPos)
+        mCurrentLayer?.setConfig(mCurrentLayerConfig)
+
+        if (mNeedAudio){
+            mCurrentAudioLayerConfig?.setNumber(Layer.CONFIG_START_POS,start)
+            mCurrentAudioLayer?.setConfig(mCurrentAudioLayerConfig)
+        }
+
+        if (!mEditor!!.build()) {
+            TLog.e("Editor reBuild failed")
+            throw Exception()
+        }
+        mEditor!!.player?.unlock()
+    }
+
     fun setVideoPath(path: String){
         mCurrentPath = path
 
+    }
+
+    fun setAudioPath(path: String){
+        mCurrentAudioPath = path
     }
 
     fun needAudio(need : Boolean){

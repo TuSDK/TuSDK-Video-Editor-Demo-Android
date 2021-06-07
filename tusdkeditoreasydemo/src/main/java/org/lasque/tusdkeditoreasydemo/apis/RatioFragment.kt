@@ -133,7 +133,7 @@ class RatioFragment : BaseFragment(FunctionType.VideoRatio) {
 
     private fun initLayer() {
         for (item in mVideoList!!) {
-            mClipList.add(VideoItem.createVideoItem(item.path, mEditor!!,false,item.type == AlbumItemType.Video))
+            mClipList.add(VideoItem.createVideoItem(item.path, mEditor!!,false,item.type == AlbumItemType.Video,item.audioPath))
         }
 
         val videoLayer = ClipLayer(mEditor!!.context, true)

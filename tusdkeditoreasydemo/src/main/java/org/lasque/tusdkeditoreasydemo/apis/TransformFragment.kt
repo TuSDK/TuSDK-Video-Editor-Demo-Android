@@ -40,14 +40,6 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
 
     private var mVideoItem : VideoItem? = null
 
-    private var mVTransformEffect : Effect? = null
-
-    private var mVTransformConfig = Config()
-
-    private var mHTransformEffect : Effect? = null
-
-    private var mHTransFormConfig = Config()
-
     private var mSpinEffect : Effect? = null
 
     private var mSpinConfig = Config()
@@ -57,6 +49,8 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
     private var mCurrentVMode = VideoTransformEffect.MODE_None
 
     private var mCurrentHMode = VideoTransformEffect.MODE_None
+
+    private var mTransfer = VideoTransformEffect.ModeTransfer(VideoTransformEffect.MODE_None)
 
     override fun getLayoutId(): Int {
         return R.layout.transform_fragment_layout
@@ -94,8 +88,9 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
                         val currentFrame = mPlayerContext!!.currentFrame
                         mOnPlayerStateUpdateListener?.onPlayerPause()
                         playerLock()
-                        mVTransformConfig.setString(VideoTransformEffect.CONFIG_MODE,mCurrentVMode)
-                        mVTransformEffect?.setConfig(mVTransformConfig)
+                        mCurrentSpinMode = mTransfer.ApplyFlip()
+                        mSpinConfig.setString(VideoTransformEffect.CONFIG_MODE,mCurrentSpinMode)
+                        mSpinEffect?.setConfig(mSpinConfig)
                         refreshEditor()
                         playerUnlock()
                         mEditor!!.player.previewFrame(currentFrame)
@@ -112,8 +107,9 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
                         val currentFrame = mPlayerContext!!.currentFrame
                         mOnPlayerStateUpdateListener?.onPlayerPause()
                         playerLock()
-                        mHTransFormConfig.setString(VideoTransformEffect.CONFIG_MODE,mCurrentHMode)
-                        mHTransformEffect?.setConfig(mHTransFormConfig)
+                        mCurrentSpinMode = mTransfer.ApplyMirror()
+                        mSpinConfig.setString(VideoTransformEffect.CONFIG_MODE,mCurrentSpinMode)
+                        mSpinEffect?.setConfig(mSpinConfig)
                         refreshEditor()
                         playerUnlock()
                         mEditor!!.player.previewFrame(currentFrame)
@@ -125,21 +121,7 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
     }
 
     private fun nextSpin(){
-        mCurrentSpinMode =  when(mCurrentSpinMode){
-            VideoTransformEffect.MODE_None ->{
-                VideoTransformEffect.MODE_K90
-            }
-            VideoTransformEffect.MODE_K90->{
-                VideoTransformEffect.MODE_K180
-            }
-            VideoTransformEffect.MODE_K180->{
-                VideoTransformEffect.MODE_K270
-            }
-            VideoTransformEffect.MODE_K270->{
-                VideoTransformEffect.MODE_None
-            }
-            else -> VideoTransformEffect.MODE_None
-        }
+        mCurrentSpinMode = mTransfer.ApplyRotate(true)
     }
 
     private fun restoreLayer(): Boolean{
@@ -156,22 +138,15 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
         mSpinEffect = videoClip.effects().get(152)
         mSpinConfig = mSpinEffect!!.config
 
-        mVTransformEffect = videoClip.effects().get(153)
-        mVTransformConfig = mVTransformEffect!!.config
-
-        mHTransformEffect = videoClip.effects().get(154)
-        mHTransFormConfig = mHTransformEffect!!.config
-
         mCurrentSpinMode = mSpinConfig.getString(VideoTransformEffect.CONFIG_MODE)
-        mCurrentVMode = mVTransformConfig.getString(VideoTransformEffect.CONFIG_MODE)
-        mCurrentHMode = mHTransFormConfig.getString(VideoTransformEffect.CONFIG_MODE)
 
+        mTransfer = VideoTransformEffect.ModeTransfer(mCurrentSpinMode)
         return true
     }
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
 
         val duration = mVideoItem!!.mVideoClip.streamInfo.duration
 
@@ -203,19 +178,6 @@ class TransformFragment : BaseFragment(FunctionType.Transform) {
         spinEffect.setConfig(mSpinConfig)
         mVideoItem!!.mVideoClip.effects().add(152,spinEffect)
 
-        val vTransformEffect = Effect(context, VideoTransformEffect.TYPE_NAME)
-        mVTransformConfig.setString(VideoTransformEffect.CONFIG_MODE, VideoTransformEffect.MODE_None)
-        vTransformEffect.setConfig(mVTransformConfig)
-        mVideoItem!!.mVideoClip.effects().add(153,vTransformEffect)
-
-        val hTransformEffect = Effect(context,VideoTransformEffect.TYPE_NAME)
-        mHTransFormConfig.setString(VideoTransformEffect.CONFIG_MODE, VideoTransformEffect.MODE_None)
-        hTransformEffect.setConfig(mHTransFormConfig)
-        mVideoItem!!.mVideoClip.effects().add(154,hTransformEffect)
-
-
-        mVTransformEffect = vTransformEffect
-        mHTransformEffect = hTransformEffect
         mSpinEffect = spinEffect
     }
 

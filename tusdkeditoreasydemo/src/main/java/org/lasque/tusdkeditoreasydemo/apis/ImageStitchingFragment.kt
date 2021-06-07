@@ -153,13 +153,16 @@ public class ImageStitchingFragment : BaseFragment(FunctionType.ImageStitching) 
 
         mVideoLayer = videoLayer
 
+        VideoItem.plusClipCount(videoClipMaps.size)
+
+
         return true
 
     }
 
     private fun initLayer() {
         for (item in mVideoList!!){
-             mClipList.add(createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video))
+             mClipList.add(createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath))
         }
 
         val videoLayer = ClipLayer(mEditor!!.context,true)
@@ -201,7 +204,7 @@ public class ImageStitchingFragment : BaseFragment(FunctionType.ImageStitching) 
         mVideoList!!.addAll(list)
         playerLock()
         for (item in list){
-            val clip = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+            val clip = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
             mVideoLayer!!.addClip(clip.mId.toInt(),clip.mVideoClip)
             mClipList.add(clip)
         }

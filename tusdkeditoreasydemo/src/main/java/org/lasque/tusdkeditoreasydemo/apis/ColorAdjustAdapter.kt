@@ -143,10 +143,11 @@ class ColorAdjustAdapter(itemList: MutableList<ColorAdjustItem>, context: Contex
             val maxValue = (params2.max - params2.min) * 100
             val holderV2 = holder as ColorAdjustViewHolderV2
             val currentValue = (params2.defaultValue - params2.min) * 100
-            holder.parmasBarV2.progress = currentValue.toInt()
-            holderV2.parmasTitleV2.setText(params2.titleId)
             holderV2.parmasBarV2.max = maxValue.toInt()
-            holder.parmasValueV2.setText(String.format("%.2f",params2.defaultValue))
+            holderV2.parmasBarV2.progress = currentValue.toInt()
+            holderV2.parmasTitleV2.setText(params2.titleId)
+
+            holderV2.parmasValueV2.setText(String.format("%.2f",params2.defaultValue))
             holderV2.parmasBarV2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                     if (!p2) return

@@ -10,6 +10,7 @@
  */
 package org.lasque.tusdkeditoreasydemo.apis
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
@@ -25,10 +26,14 @@ import kotlinx.android.synthetic.main.canvas_background_fragment.*
 import org.jetbrains.anko.support.v4.runOnUiThread
 import org.lasque.tusdkeditoreasydemo.FunctionType
 import org.lasque.tusdkeditoreasydemo.R
+import org.lasque.tusdkeditoreasydemo.album.AlbumActivity
+import org.lasque.tusdkeditoreasydemo.album.AlbumInfo
 import org.lasque.tusdkeditoreasydemo.album.AlbumItemType
+import org.lasque.tusdkeditoreasydemo.base.BaseActivity
 import org.lasque.tusdkeditoreasydemo.base.BaseFragment
 import org.lasque.tusdkeditoreasydemo.base.VideoItem
 import org.lasque.tusdkeditoreasydemo.base.views.ColorView
+import org.lasque.tusdkpulse.core.utils.TLog
 
 /**
  * TuSDK
@@ -49,6 +54,23 @@ class CanvasBackgroundFragment : BaseFragment(FunctionType.CanvasBackgroundType)
     private var mCanvasProperty : CanvasResizeEffect.PropertyBuilder = CanvasResizeEffect.PropertyBuilder()
 
     private var isRestore = false
+
+    private val IMAGE_BACKGROUND_REQUEST_CODE = 150
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == IMAGE_BACKGROUND_REQUEST_CODE && resultCode == BaseActivity.ALBUM_RESULT_CODE){
+            var albumBundle = data!!.getBundleExtra("select")
+            var albumList = albumBundle?.getSerializable("select") as ArrayList<AlbumInfo>
+            mThreadPool?.execute {
+                mCanvasProperty.holder.type = CanvasResizeEffect.BackgroundType.IMAGE
+                mCanvasProperty.holder.image = albumList[0].path
+                mCanvasEffect?.setProperty(CanvasResizeEffect.PROP_PARAM,mCanvasProperty.makeProperty())
+                mOnPlayerStateUpdateListener?.onRefreshFrame()
+            }
+        }
+    }
 
     override fun getLayoutId(): Int {
         return R.layout.canvas_background_fragment
@@ -72,18 +94,29 @@ class CanvasBackgroundFragment : BaseFragment(FunctionType.CanvasBackgroundType)
                         mCanvasEffect?.setProperty(CanvasResizeEffect.PROP_PARAM,mCanvasProperty.makeProperty())
                         mOnPlayerStateUpdateListener?.onRefreshFrame()
                     }
+
+                    lsq_canvas_background_color_bar.findColorInt(mCanvasProperty.holder.color)
                 }
                 lsq_blue_background.setOnClickListener {
                     showOrHideColorView(false)
-                    showOrHideBlueView(false)
+                    showOrHideBlueView(true)
                     mThreadPool?.execute {
                         mCanvasProperty.holder.type = CanvasResizeEffect.BackgroundType.BLUR
                         mCanvasEffect?.setProperty(CanvasResizeEffect.PROP_PARAM,mCanvasProperty.makeProperty())
                         mOnPlayerStateUpdateListener?.onRefreshFrame()
                     }
                 }
+
+                lsq_image_background.setOnClickListener {
+                    showOrHideColorView(false)
+                    showOrHideBlueView(true)
+
+                    openAlbum(1,true,false,IMAGE_BACKGROUND_REQUEST_CODE)
+                }
+
                 lsq_canvas_background_color_bar.setOnColorChangeListener(object : ColorView.OnColorChangeListener{
                     override fun changeColor(colorId: Int) {
+                        TLog.e("current select color ${colorId}")
                         mThreadPool?.execute {
                             mCanvasProperty.holder.color = colorId
                             mCanvasEffect?.setProperty(CanvasResizeEffect.PROP_PARAM,mCanvasProperty.makeProperty())
@@ -119,8 +152,9 @@ class CanvasBackgroundFragment : BaseFragment(FunctionType.CanvasBackgroundType)
                     if (mCanvasProperty.holder.type == CanvasResizeEffect.BackgroundType.COLOR){
                         showOrHideBlueView(false)
                         showOrHideColorView(true)
+                        TLog.e("current color ${mCanvasProperty.holder.color}")
                         lsq_canvas_background_color_bar.findColorInt(mCanvasProperty.holder.color)
-                    } else if (mCanvasProperty.holder.type == CanvasResizeEffect.BackgroundType.BLUR){
+                    } else if (mCanvasProperty.holder.type == CanvasResizeEffect.BackgroundType.BLUR || mCanvasProperty.holder.type == CanvasResizeEffect.BackgroundType.IMAGE){
                         showOrHideColorView(false)
                         showOrHideBlueView(true)
                         lsq_blue_mix_bar.progress = (mCanvasProperty.holder.blurStrength * 100).toInt()
@@ -172,7 +206,7 @@ class CanvasBackgroundFragment : BaseFragment(FunctionType.CanvasBackgroundType)
     private fun initLayer() {
         val item = mVideoList!![0]
 
-        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,false,item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,false,item.type == AlbumItemType.Video,item.audioPath)
 
         var videoLayer = ClipLayer(mEditor!!.context, true)
         val videoLayerConfig = Config()
@@ -201,5 +235,7 @@ class CanvasBackgroundFragment : BaseFragment(FunctionType.CanvasBackgroundType)
         mEditor!!.audioComposition().addLayer(11, audioLayer)
 
         mCanvasEffect = resizeEffect
+
+        mCanvasProperty.holder.blurStrength = 1.0
     }
 }

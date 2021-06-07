@@ -58,6 +58,8 @@ class DraftActivity : BaseActivity() {
             lsq_particle_list_panel.visibility = View.VISIBLE
             var draftList : MutableList<DraftItem> = gson.fromJson(draftListJson,type)
 
+            draftList.sortedDescending()
+
             val draftAdapter = DraftAdapter(draftList,this)
             draftAdapter.setOnItemClickListener(object : OnItemClickListener<DraftItem, DraftAdapter.DraftViewHolder> {
                 override fun onItemClick(pos: Int, holder: DraftAdapter.DraftViewHolder, item: DraftItem) {
@@ -72,6 +74,18 @@ class DraftActivity : BaseActivity() {
                         FunctionType.Text ->{
                             startActivity<TextStickerActivity>(DraftItem.Draft_Path_Key to item.draftPath)
 
+                        }
+
+                        FunctionType.Bubble->{
+                            startActivity<BubbleTextActivity>(DraftItem.Draft_Path_Key to item.draftPath)
+                        }
+
+                        FunctionType.Graffiti->{
+                            startActivity<GraffitiActivity>(DraftItem.Draft_Path_Key to item.draftPath)
+                        }
+
+                        FunctionType.Mosaic->{
+                            startActivity<MosaicActivity>(DraftItem.Draft_Path_Key to item.draftPath)
                         }
                         else -> {
                             startActivity<ApiActivity>("function" to functionType,DraftItem.Draft_Path_Key to item.draftPath)
@@ -133,7 +147,7 @@ class DraftActivity : BaseActivity() {
         if (!draftListJson.isNullOrBlank()){
             val type = object : TypeToken<MutableList<DraftItem>>() {}.type
             var draftList: MutableList<DraftItem> = gson.fromJson(draftListJson, type)
-
+            draftList.sortDescending()
             mDraftAdapter?.updateDraftList(draftList)
         }
     }

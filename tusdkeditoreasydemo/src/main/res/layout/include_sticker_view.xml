@@ -38,25 +38,6 @@
         app:layout_constraintRight_toRightOf="@id/lsq_api_displayView"
         app:layout_constraintTop_toTopOf="@id/lsq_api_displayView" />
 
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="30dp"
-        app:layout_constraintBottom_toBottomOf="@id/lsq_api_displayView"
-        app:layout_constraintLeft_toLeftOf="@id/lsq_api_displayView"
-        app:layout_constraintRight_toRightOf="@id/lsq_api_displayView" />
 
-    <TextView
-        android:id="@+id/lsq_player_duration"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:gravity="center"
-        android:text="00:00/00:00"
-        android:textColor="@color/lsq_color_red"
-        android:textSize="13sp"
-        app:layout_constraintBottom_toTopOf="@id/seekBar"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

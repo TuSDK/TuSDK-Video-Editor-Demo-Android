@@ -37,7 +37,9 @@ import org.lasque.tusdkpulse.core.view.TuSdkRelativeLayout
 import org.lasque.tusdkpulse.core.view.TuSdkViewHelper
 import org.lasque.tusdkeditoreasydemo.base.views.TuSdkImageButton
 import org.lasque.tusdkeditoreasydemo.base.EditorPlayerContext
+import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
@@ -64,6 +66,7 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
     protected var mEnableExpand = true
 
     protected var mListener : OnStickerLayerItemViewListener? = null
+
     protected var isMoveEvent = false
     protected var mParentFrame: Rect = Rect()
 
@@ -120,11 +123,17 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
 
     protected var mClipDuration : Long = 0
 
+    protected var mClipStartPos : Long = 0
+
+    protected var mClipEndPos : Long = 0
+
     protected var mLayerStartPos : Long = 0
 
     protected var mLayerEndPos : Long = 0
 
     protected var mMaxLayerDuration : Long = 0
+
+    protected var mClipMaxDuration : Long = 0
 
     protected var mPlayerContext : EditorPlayerContext? = null
 
@@ -205,9 +214,11 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
     override fun resize(frame: Rect) {
         if (mParentFrame.equals(frame)) return
         this.mParentFrame = frame
-        mThreadPool?.execute {
+        var res : Future<Unit>? = mThreadPool?.submit(Callable<Unit> {
             updateViewSize()
-        }
+        } )
+
+        res?.get()
     }
 
     override fun setListener(listener: OnStickerLayerItemViewListener) {
@@ -238,6 +249,18 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
         return mMaxLayerDuration
     }
 
+    fun getClipMaxDuration() : Long{
+        return mClipMaxDuration
+    }
+
+    fun getClipStart() : Long{
+        return mClipStartPos
+    }
+
+    fun getClipEnd() : Long{
+        return mClipEndPos
+    }
+
     override open fun createLayer() {
         mEditor!!.player?.lock()
         val layer = ClipLayer(mEditor!!.context,true)
@@ -261,12 +284,11 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
         if (mClipDuration == 0L){
             mClipDuration = layer!!.streamInfo.duration
         }
-        if (mLayerEndPos == 0L){
-            mLayerEndPos = mLayerStartPos + layer!!.streamInfo.duration
-        }
+        mLayerEndPos = mLayerStartPos + layer!!.streamInfo.duration
+
         if (mMaxLayerDuration == 0L) mMaxLayerDuration = mLayerStartPos + layer!!.streamInfo.duration
 
-        if (mCurrentLayerType == LayerType.Text) return
+        if (mCurrentLayerType == LayerType.Text || mCurrentLayerType == LayerType.Bubble) return
         if (mEditor!!.videoComposition().allLayers.size > 1){
             mResizeProperty.holder.pzr_zoom = 0.5
             layer.setProperty(Layer.PROP_OVERLAY,mResizeProperty.makeProperty())
@@ -318,7 +340,7 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
 
             if (mMaxLayerDuration == 0L) mMaxLayerDuration = mLayerStartPos + layer!!.streamInfo.duration
 
-            if (mCurrentLayerType == LayerType.Text) return@execute
+            if (mCurrentLayerType == LayerType.Text || mCurrentLayerType == LayerType.Bubble) return@execute
             mScale = resizeHolder.pzr_zoom.toFloat()
             val view = this
             val posProperty =  Layer.InteractionInfo(layer.getProperty(Layer.PROP_INTERACTION_INFO))
@@ -357,6 +379,20 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
 
     abstract fun setClipDuration(start : Long,end : Long)
 
+    open fun setLayerStartPos(start : Long){
+        mLayerStartPos = start
+        mLayerEndPos = mLayerStartPos + mClipDuration
+        mEditor!!.player?.lock()
+        mCurrentLayerConfig?.setNumber(Layer.CONFIG_START_POS,mLayerStartPos)
+        mCurrentLayer?.setConfig(mCurrentLayerConfig)
+
+        if (!mEditor!!.build()) {
+            TLog.e("Editor reBuild failed")
+            throw Exception()
+        }
+        mEditor!!.player?.unlock()
+    }
+
     fun getClipDuration() : Long{
         return mClipDuration
     }
@@ -373,7 +409,7 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
         return mConfigTouchListner.onTouch(this,event)
     }
 
-    protected fun handleTransActionStart(event : MotionEvent){
+    open protected fun handleTransActionStart(event : MotionEvent){
         isMoveEvent = false
         mListener?.onItemSelected(this)
     }
@@ -471,12 +507,15 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
         this.computerScale(data.stepSpace,caPoint)
 
         this.requestLayout()
-        mThreadPool?.execute {
+
+        var res : Future<Unit>? = mThreadPool?.submit(Callable<Unit> {
             updateRotate()
             updateZoom()
             updateProperty()
             updateViewSize()
-        }
+        })
+
+        res?.get()
     }
 
     protected val mOnTouchListener = object : OnTouchListener{
@@ -528,12 +567,14 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
 
         requestLayout()
         mLastPoint.set(point.x,point.y)
-        mThreadPool?.execute {
+        var res : Future<Unit>? = mThreadPool?.submit(Callable<Unit> {
             updateRotate()
             updateZoom()
             updateProperty()
             updateViewSize()
-        }
+        })
+
+        res?.get()
     }
 
     protected open fun updateZoom() {
@@ -647,7 +688,7 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
         // TLog.d("fixedMovePoint 2: %s", trans);
     }
 
-    public fun requestShower(frame : Long){
+    open public fun requestShower(frame : Long){
         TLog.e("id ${mCurrentLayerId} start pos ${mLayerStartPos} end pos ${mLayerEndPos}")
         if (frame in (mLayerStartPos) until mLayerEndPos){
             visibility = View.VISIBLE
@@ -657,7 +698,11 @@ abstract class LayerItemViewBase : TuSdkRelativeLayout,StickerLayerItemViewInter
     }
 
     protected open fun updateViewSize(){
-        val posProperty =  Layer.InteractionInfo(mCurrentLayer!!.getProperty(Layer.PROP_INTERACTION_INFO))
+
+        var interactionInfoProperty: Property? = mCurrentLayer!!.getProperty(Layer.PROP_INTERACTION_INFO)
+                ?: return
+
+        val posProperty =  Layer.InteractionInfo(interactionInfoProperty)
         val streamInfo = (mEditor!!.videoComposition().streamInfo as VideoStreamInfo)
         val hp = streamInfo.width / mParentFrame.width().toFloat()
         val lastSize = mDefaultViewSize.copy()

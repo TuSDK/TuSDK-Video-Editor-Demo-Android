@@ -32,6 +32,12 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".DraftActivity" />
+        <activity android:name=".BubbleTextActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".GraffitiActivity" />
+        <activity android:name=".MosaicActivity" />
     </application>
     <uses-feature android:name="android.hardware.camera" /> <!-- 允许应用程序写数据到外部存储设备（主要是SD卡） -->
     <uses-feature android:name="android.hardware.camera.autofocus" />

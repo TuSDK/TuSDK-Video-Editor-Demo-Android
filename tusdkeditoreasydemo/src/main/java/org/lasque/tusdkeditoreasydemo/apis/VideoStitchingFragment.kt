@@ -43,7 +43,7 @@ import kotlin.collections.ArrayList
  * @Copyright    (c) 2020 tusdk.com. All rights reserved.
  *
  */
-public class VideoStitchingFragment : BaseFragment(FunctionType.VideoStitching) {
+public class VideoStitchingFragment(functionType: FunctionType) : BaseFragment(functionType) {
 
     private val ALBUM_ADD_REQUEST_CODE = 2
 
@@ -129,7 +129,8 @@ public class VideoStitchingFragment : BaseFragment(FunctionType.VideoStitching) 
                 view.lsq_video_list.adapter = mVideoAdapter
 
                 lsq_video_add.setOnClickListener {
-                    startActivityForResult<AlbumActivity>(ALBUM_ADD_REQUEST_CODE,"maxSize" to maxSize - mClipList.size,"onlyImage" to false,"onlyVideo" to true)
+                    val isOnlyVideo = mType == FunctionType.VideoStitching
+                    startActivityForResult<AlbumActivity>(ALBUM_ADD_REQUEST_CODE,"maxSize" to maxSize - mClipList.size,"onlyImage" to false,"onlyVideo" to isOnlyVideo)
                 }
 
                 if (mClipList.size >= maxSize){
@@ -174,6 +175,8 @@ public class VideoStitchingFragment : BaseFragment(FunctionType.VideoStitching) 
             mClipList.add(VideoItem(path, itemId.toLong(),videoClip, audioClip))
         }
 
+        VideoItem.plusClipCount(videoClipMaps.size)
+
         mVideoLayer = videoLayer
         mAudioLayer = audioLayer
 
@@ -183,7 +186,7 @@ public class VideoStitchingFragment : BaseFragment(FunctionType.VideoStitching) 
 
     private fun initLayer() {
         for (item in mVideoList!!){
-             mClipList.add(createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video))
+             mClipList.add(createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath))
         }
 
         val videoLayer = ClipLayer(mEditor!!.context,true)
@@ -225,7 +228,7 @@ public class VideoStitchingFragment : BaseFragment(FunctionType.VideoStitching) 
         playerLock()
         mVideoList!!.addAll(list)
         for (item in list){
-            val clip = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+            val clip = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
             mVideoLayer!!.addClip(clip.mId.toInt(),clip.mVideoClip)
             mAudioLayer!!.addClip(clip.mId.toInt(),clip.mAudioClip)
             mClipList.add(clip)

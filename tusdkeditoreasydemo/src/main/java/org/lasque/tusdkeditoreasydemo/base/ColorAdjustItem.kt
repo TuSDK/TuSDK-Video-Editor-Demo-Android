@@ -25,12 +25,12 @@ import org.lasque.tusdkeditoreasydemo.R
  */
 enum class ColorAdjustItem(val key : String,val params : MutableList<ParamsItem>,val titleIds : Int,val propertyItem : ColorAdjustEffect.PropertyItem) {
     WhiteBalance(ColorAdjustEffect.PROP_TYPE_WhiteBalance,
-            mutableListOf<ParamsItem>(ParamsItem(-1.0,1.0,0.0,R.string.lsq_adjust_color_temperature), ParamsItem(0.0,1.0,0.0,R.string.lsq_adjust_color_tone)),
+            mutableListOf<ParamsItem>(ParamsItem(-1.0,1.0,0.0,R.string.lsq_adjust_color_temperature), ParamsItem(-1.0,1.0,0.0,R.string.lsq_adjust_color_tone)),
             R.string.lsq_adjust_white_balance,
             ColorAdjustEffect.PropertyItem(ColorAdjustEffect.PROP_TYPE_WhiteBalance,0.0,0.0)
     ),
     HighlightShadow(ColorAdjustEffect.PROP_TYPE_HighlightShadow,
-            mutableListOf(ParamsItem(0.0,1.0,0.0,R.string.lsq_adjust_highlight), ParamsItem(0.0,1.0,0.0,R.string.lsq_adjust_shadow)),
+            mutableListOf(ParamsItem(-1.0,1.0,0.0,R.string.lsq_adjust_highlight), ParamsItem(-1.0,1.0,0.0,R.string.lsq_adjust_shadow)),
             R.string.lsq_adjust_highlight_shadow,
             ColorAdjustEffect.PropertyItem(ColorAdjustEffect.PROP_TYPE_HighlightShadow,0.0,0.0)
             ),
@@ -45,7 +45,7 @@ enum class ColorAdjustItem(val key : String,val params : MutableList<ParamsItem>
             ColorAdjustEffect.PropertyItem(ColorAdjustEffect.PROP_TYPE_Brightness,0.0)
             ),
     Contrast(ColorAdjustEffect.PROP_TYPE_Contrast,
-            mutableListOf(ParamsItem(0.0,1.0,0.0,R.string.lsq_adjust_mixied)),
+            mutableListOf(ParamsItem(-1.0,1.0,0.0,R.string.lsq_adjust_mixied)),
             R.string.lsq_adjust_contrast,
             ColorAdjustEffect.PropertyItem(ColorAdjustEffect.PROP_TYPE_Contrast,0.0)
             ),

@@ -31,11 +31,12 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.marginBottom
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.bar.DoubleHeadedDragonBar
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.gson.Gson
+import com.jaygoo.widget.OnRangeChangedListener
+import com.jaygoo.widget.RangeSeekBar
 import com.tusdk.pulse.Config
 import com.tusdk.pulse.Engine
 import com.tusdk.pulse.Player
@@ -44,39 +45,41 @@ import com.tusdk.pulse.editor.ClipLayer
 import com.tusdk.pulse.editor.EditorModel
 import com.tusdk.pulse.editor.Layer
 import com.tusdk.pulse.editor.VideoEditor
-import com.tusdk.pulse.editor.clips.Text2DClip
+import com.tusdk.pulse.editor.clips.AnimationTextClip
 import kotlinx.android.synthetic.main.include_sticker_view.*
 import kotlinx.android.synthetic.main.include_title_layer.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_align.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_alpha.view.*
+import kotlinx.android.synthetic.main.lsq_editor_component_text_anitext_in.view.*
+import kotlinx.android.synthetic.main.lsq_editor_component_text_anitext_out.*
+import kotlinx.android.synthetic.main.lsq_editor_component_text_anitext_out.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_array.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_background.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_blend.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_color.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_color.view.lsq_editor_component_text_font_back
+import kotlinx.android.synthetic.main.lsq_editor_component_text_shadow.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_spacing.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_stroke.view.*
 import kotlinx.android.synthetic.main.lsq_editor_component_text_style.view.*
+import kotlinx.android.synthetic.main.repeat_fragment.view.*
 import kotlinx.android.synthetic.main.text_sticker_activity.*
-import kotlinx.android.synthetic.main.text_sticker_activity.lsq_editor_cut_load
-import kotlinx.android.synthetic.main.text_sticker_activity.lsq_editor_cut_load_parogress
-import kotlinx.android.synthetic.main.text_sticker_activity.lsq_start_bar
-import kotlinx.android.synthetic.main.text_sticker_activity.lsq_sticker_play
-import org.lasque.tusdkpulse.core.utils.DateHelper
-import org.lasque.tusdkpulse.core.utils.TLog
-import org.lasque.tusdkpulse.core.utils.image.BitmapHelper
-import org.lasque.tusdkpulse.core.utils.sqllite.ImageSqlHelper
-import org.lasque.tusdkpulse.impl.view.widget.TuSeekBar
+import org.jetbrains.anko.toast
 import org.lasque.tusdkeditoreasydemo.TextStickerActivity.Companion.TextFunction.*
 import org.lasque.tusdkeditoreasydemo.album.AlbumInfo
 import org.lasque.tusdkeditoreasydemo.album.AlbumItemType
 import org.lasque.tusdkeditoreasydemo.base.*
 import org.lasque.tusdkeditoreasydemo.base.views.ColorView
 import org.lasque.tusdkeditoreasydemo.base.views.stickers.LayerItemViewBase
-import org.lasque.tusdkeditoreasydemo.base.views.stickers.LayerItemViewBase.Companion.CURRENT_LAYER_ID
 import org.lasque.tusdkeditoreasydemo.base.views.stickers.LayerType
 import org.lasque.tusdkeditoreasydemo.base.views.stickers.LayerViewDelegate
 import org.lasque.tusdkeditoreasydemo.base.views.stickers.TextLayerItemView
+import org.lasque.tusdkpulse.core.utils.DateHelper
+import org.lasque.tusdkpulse.core.utils.FileHelper
+import org.lasque.tusdkpulse.core.utils.TLog
+import org.lasque.tusdkpulse.core.utils.image.BitmapHelper
+import org.lasque.tusdkpulse.core.utils.sqllite.ImageSqlHelper
+import org.lasque.tusdkpulse.impl.view.widget.TuSeekBar
 import java.io.File
 import java.util.*
 import java.util.concurrent.Callable
@@ -97,7 +100,7 @@ import kotlin.collections.ArrayList
 class TextStickerActivity : BaseActivity() {
 
     companion object {
-        const val MAX_STROKE_WIDTH = 2
+        const val MAX_STROKE_WIDTH = 100
 
         enum class TextFunction(iconId: Int, textId: Int) {
             ADD(R.drawable.edit_ic_add, R.string.lsq_editor_text_add),
@@ -111,11 +114,113 @@ class TextStickerActivity : BaseActivity() {
             STYLE(R.drawable.edit_ic_style, R.string.lsq_editor_text_style),
             FONT(R.drawable.edit_ic_font, R.string.lsq_editor_text_font),
             BLEND(R.drawable.t_ic_transparency, R.string.lsq_editor_text_blend),
+            ANITEXT(R.drawable.t_ic_animation,R.string.lsq_editor_text_anitext),
+            SHADOW(R.drawable.t_ic_shadow,R.string.lsq_editor_text_shadow),
             ;
 
             public val iconId = iconId
             public val textId = textId
         }
+
+
+        val Input_Animation_List = mutableListOf(
+                AnimationItem("none",0),
+                AnimationItem("BlurIn",1),
+                AnimationItem("WaveIn",2),
+                AnimationItem("RotateFlyIn",3),
+                AnimationItem("CloseUp",4),
+                AnimationItem("ShotIn",5),
+                AnimationItem("FlipUpIn",6),
+                AnimationItem("ElasticScaleIn",7),
+                AnimationItem("SpringIn",8),
+                AnimationItem("FadeIn",9),
+                AnimationItem("GrowUpIn",10),
+                AnimationItem("EnlargeSlightIn",11),
+                AnimationItem("ShrinkIn",12),
+                AnimationItem("EnlargeIn",13),
+                AnimationItem("RandomFlyIn",14),
+                AnimationItem("ScrewIn",15),
+                AnimationItem("RotateCornerIn",16),
+                AnimationItem("PrinterOneIn",17),
+                AnimationItem("PrinterTwoIn",18),
+                AnimationItem("PrinterThreeIn",19),
+                AnimationItem("MoveLeftIn",20),
+                AnimationItem("MoveRightIn",21),
+                AnimationItem("MoveUpIn",22),
+                AnimationItem("MoveDownIn",23),
+                AnimationItem("LinearWipeLeftIn",24),
+                AnimationItem("LinearWipeRightIn",25),
+                AnimationItem("LinearWipeUpIn",26),
+                AnimationItem("LinearWipeDownIn",27),
+                AnimationItem("LinearWipeFeatherLeftIn",28),
+                AnimationItem("LinearWipeFeatherRightIn",29),
+                AnimationItem("LinearWipeFeatherMiddleHorInt",30),
+                AnimationItem("LinearWipeFeatherMiddleVerInt",31),
+                AnimationItem("RadialWipeLeftIn",32),
+                AnimationItem("RadialWipeRightIn",33),
+                AnimationItem("BounceIn",34),
+                AnimationItem("ByteDanceLoveIn",84),
+                AnimationItem("ByteDanceNoteIn",85)
+
+        )
+
+        val Output_Animation_List = mutableListOf(
+                AnimationItem("none",0),
+                AnimationItem("BlurOut",35),
+                AnimationItem("WaveOut",36),
+                AnimationItem("RotateFlyOut",37),
+                AnimationItem("OpenUp",38),
+                AnimationItem("ShotOut",39),
+                AnimationItem("FlipUpOut",40),
+                AnimationItem("ElasticScaleOut",41),
+                AnimationItem("SpringOut",42),
+                AnimationItem("FadeOut",43),
+                AnimationItem("GrowUpOut",44),
+                AnimationItem("EnlargeSlightOut",45),
+                AnimationItem("ShrinkOut",46),
+                AnimationItem("EnlargeOut",47),
+                AnimationItem("RandomFlyOut",48),
+                AnimationItem("ScrewOut",49),
+                AnimationItem("RotateCornerOut",50),
+                AnimationItem("PrinterOneOut",51),
+                AnimationItem("PrinterTwoOut",52),
+                AnimationItem("PrinterThreeOut",53),
+                AnimationItem("MoveLeftOut",54),
+                AnimationItem("MoveRightOut",55),
+                AnimationItem("MoveUpOut",56),
+                AnimationItem("MoveDownOut",57),
+                AnimationItem("LinearWipeLeftOut",58),
+                AnimationItem("LinearWipeRightOut",59),
+                AnimationItem("LinearWipeUpOut",60),
+                AnimationItem("LinearWipeDownOut",61),
+                AnimationItem("LinearWipeFeatherLeftOut",62),
+                AnimationItem("LinearWipeFeatherRightOut",63),
+                AnimationItem("LinearWipeFeatherMiddleHorOut",64),
+                AnimationItem("LinearWipeFeatherMiddleVerOut",65),
+                AnimationItem("RadialWipeLeftOut",66),
+                AnimationItem("RadialWipeRightOut",67),
+                AnimationItem("BounceOut",68)
+        )
+
+        val Overall_Animation_List = mutableListOf(
+                AnimationItem("none",0),
+                AnimationItem("FlipHor",69),
+                AnimationItem("FlipVer",70),
+                AnimationItem("SubtitleHor",71),
+                AnimationItem("SubtitleVer",72),
+                AnimationItem("Waggle",73),
+                AnimationItem("Swing",74),
+                AnimationItem("Wiper",75),
+                AnimationItem("Tricky",76),
+                AnimationItem("EnlargeChar",77),
+                AnimationItem("Heartbeat",78),
+                AnimationItem("FaultFlicker",79),
+                AnimationItem("Spark",80),
+                AnimationItem("Rock",81),
+                AnimationItem("Shake",82),
+                AnimationItem("Bounce",83)
+
+        )
     }
 
     /******************************************** Editor **********************************************************/
@@ -181,7 +286,7 @@ class TextStickerActivity : BaseActivity() {
     /************************************************ View *********************************************************/
 
     private val mTextFunctions: MutableList<TextFunction> = mutableListOf(
-            ADD, COLOR, ALPHA, STROKE, BACKGROUND, SPACE, ALIGN, ARRAY, STYLE, FONT, BLEND
+            ADD, ANITEXT,SHADOW,COLOR, ALPHA, STROKE, BACKGROUND, SPACE, ALIGN, ARRAY, STYLE, FONT, BLEND
     )
 
     private var mCurrentItemView: TextLayerItemView? = null
@@ -206,6 +311,10 @@ class TextStickerActivity : BaseActivity() {
 
     private var mBlendOption: TextBlendOption? = null
 
+    private var mAnimationOption : TextAnimationOption? = null
+
+    private var mShadowOption: TextShadowOption? = null
+
     private var isFirstCallSoftInput = true
 
     private var isFromModel = false
@@ -223,7 +332,10 @@ class TextStickerActivity : BaseActivity() {
                 if (mWindowHeight != height){
                     val softKeyboardHeight = mWindowHeight - height
                     (lsq_text_input_layer.layoutParams as ConstraintLayout.LayoutParams).setMargins(0,0,0,softKeyboardHeight)
-                    lsq_text_input_layer.invalidate()
+                    lsq_text_input_layer.visibility = View.VISIBLE
+                    lsq_text_input_layer.postInvalidate()
+                } else {
+                    lsq_text_input_layer.visibility = View.GONE
                 }
             }
         }
@@ -453,16 +565,22 @@ class TextStickerActivity : BaseActivity() {
             }
         }
     }
+    private var mCurrentProducer : VideoEditor.Producer? = null
 
+    private var mCurrentSavePath = ""
+
+    private var isNeedSave = true
 
     private fun saveVideo() {
         mThreadPool.execute {
+            isNeedSave = true
+
             val producer = mEditor.newProducer()
             //                val outputFilePath = "${TuSdkContext.context().getExternalFilesDir(DIRECTORY_DCIM)!!.absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
 
             val outputFilePath = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
             TLog.e("output path $outputFilePath")
-
+            mCurrentSavePath = outputFilePath
             val config = Producer.OutputConfig()
             config.watermark = BitmapHelper.getRawBitmap(this, R.raw.sample_watermark)
             config.watermarkPosition = 1
@@ -470,9 +588,10 @@ class TextStickerActivity : BaseActivity() {
             producer.setListener { state, ts ->
                 if (state == Producer.State.kEND) {
                     mThreadPool.execute {
-                        producer.cancel()
                         producer.release()
                         mEditor!!.resetProducer()
+                        mPlayer!!.seekTo(mPlayerContext.currentFrame)
+                        mCurrentProducer = null
                     }
                     val contentValue = ImageSqlHelper.getCommonContentValues()
                     sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(outputFilePath))))
@@ -480,12 +599,14 @@ class TextStickerActivity : BaseActivity() {
                         setEnable(true)
                         lsq_editor_cut_load.setVisibility(View.GONE)
                         lsq_editor_cut_load_parogress.setValue(0f)
-                        Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
+                        if (isNeedSave)
+                            Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
                     }
                 } else if (state == Producer.State.kWRITING) {
+                    val currentP = (ts / producer.duration.toFloat()) * 100f
                     runOnUiThread {
                         lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                        lsq_editor_cut_load_parogress.setValue((ts / producer.duration.toFloat()) * 100f)
+                        lsq_editor_cut_load_parogress.setValue(currentP)
                     }
                 }
             }
@@ -498,6 +619,8 @@ class TextStickerActivity : BaseActivity() {
                 TLog.e("[Error] EditorProducer Start failed")
 
             }
+
+            mCurrentProducer = producer
         }
     }
 
@@ -524,25 +647,31 @@ class TextStickerActivity : BaseActivity() {
 
     private fun playerPlay() {
         mThreadPool.execute {
-            if (mPlayer!!.play()) {
+            if (mPlayer != null){
+                if (mPlayer!!.play()) {
+                    runOnUiThread {
+                        lsq_sticker_play.setImageResource(R.mipmap.edit_ic_pause)
+                    }
+                }
                 runOnUiThread {
-                    lsq_sticker_play.setImageResource(R.mipmap.edit_ic_pause)
+                    lsq_sticker_view.cancelAllItemSelected()
                 }
             }
-            runOnUiThread {
-                lsq_sticker_view.cancelAllItemSelected()
-            }
+
         }
     }
 
     private fun playerPause() {
         mThreadPool.execute {
-            if (mPlayer!!.pause()) {
-                runOnUiThread {
-                    lsq_sticker_play.setImageResource(R.mipmap.edit_ic_play)
+            if (mPlayer != null){
+                if (mPlayer!!.pause()) {
+                    runOnUiThread {
+                        lsq_sticker_play.setImageResource(R.mipmap.edit_ic_play)
+                    }
                 }
             }
         }
+
     }
 
     private fun getOptionView(function: TextFunction): View? {
@@ -610,6 +739,18 @@ class TextStickerActivity : BaseActivity() {
                 }
                 mBlendOption?.getOptionView()
             }
+            ANITEXT -> {
+                if (mAnimationOption == null){
+                    mAnimationOption = TextAnimationOption()
+                }
+                mAnimationOption?.getOptionView()
+            }
+            SHADOW -> {
+                if (mShadowOption == null){
+                    mShadowOption = TextShadowOption()
+                }
+                mShadowOption?.getOptionView()
+            }
         }
     }
 
@@ -621,7 +762,7 @@ class TextStickerActivity : BaseActivity() {
             if (albumList != null) {
                 mThreadPool.execute {
                     val item = albumList!![0]
-                    mVideoItem = VideoItem.createVideoItem(item.path, mEditor, true, item.type == AlbumItemType.Video)
+                    mVideoItem = VideoItem.createVideoItem(item.path, mEditor, true, item.type == AlbumItemType.Video,item.audioPath)
                     initLayer()
                     initPlayer()
                 }
@@ -642,8 +783,8 @@ class TextStickerActivity : BaseActivity() {
             mCurrentState = state
             mPlayerContext.state = mCurrentState
             if (state == Player.State.kDO_PLAY || state == Player.State.kDO_PAUSE) {
+                val duration = mPlayer!!.duration
                 runOnUiThread {
-                    val duration = mPlayer!!.duration
                     mMaxDuration = duration
                     seekBar.max = duration.toInt()
                 }
@@ -719,12 +860,29 @@ class TextStickerActivity : BaseActivity() {
                 override fun onEndTouch(minPercentage: Float, maxPercentage: Float) {
                     mCurrentItemViewStart = (mMaxDuration * minPercentage / 100).toLong()
                     mCurrentItemViewEnd = (mMaxDuration * maxPercentage / 100).toLong()
-                    if (mCurrentItemViewEnd - mCurrentItemViewStart < 100) {
-                        mCurrentItemViewEnd = mCurrentItemViewStart + 100
+                    if (mCurrentItemViewEnd - mCurrentItemViewStart < 1000) {
+                        if (mCurrentItemViewStart < 1000){
+                            mCurrentItemViewEnd = mCurrentItemViewStart + 1000
+                        } else {
+                            mCurrentItemViewStart = mCurrentItemViewEnd - 1000
+                        }
+
+                        val min = mCurrentItemViewStart / mMaxDuration.toFloat() * 100
+                        val max = mCurrentItemViewEnd / mMaxDuration.toFloat() * 100
+
+                        lsq_start_bar.minValue = min.toInt()
+                        lsq_start_bar.maxValue = max.toInt()
+                        lsq_start_bar.invalidate()
+
+                        toast("文字时长最小为1秒")
                     }
                     mThreadPool?.execute {
                         mCurrentItemView?.setClipDuration(mCurrentItemViewStart, mCurrentItemViewEnd)
                         mPlayer?.previewFrame(mCurrentItemViewStart)
+
+                        runOnUiThread {
+                            mAnimationOption?.refreshDurationRange()
+                        }
 //                        mPlayerContext.refreshFrame()
                     }
                 }
@@ -750,7 +908,22 @@ class TextStickerActivity : BaseActivity() {
                     mArrayOption?.setTextReverse(mCurrentItemView!!.isTextReverse())
                     mBackgroundOption?.findColor(mCurrentItemView!!.getBackgroundColor())
                     mStyleOption?.updateUnderline(mCurrentItemView!!.isUnderLine())
+                    mAlphaOption?.setAlphaPercent(mCurrentItemView!!.getTextAlpha())
+                    mStrokeOption?.setStrokeColor(mCurrentItemView!!.getStrokeColor())
+                    mStrokeOption?.setStrokeWidth(mCurrentItemView!!.getStrokeWidth())
+                    mAlignOption?.updateAlign(mCurrentItemView!!.getTextAlign())
+                    mSpacingOption?.updateLineSpacing(mCurrentItemView!!.getLineSpacing())
+                    mSpacingOption?.updateWordSpacing(mCurrentItemView!!.getWordSpacing())
+                    var currentInputAnimation : AnimationItem? = mCurrentItemView!!.getCurrentInputAnimator()
+                    mAnimationOption?.findAnimation(currentInputAnimation?.itemIndex ?: 0,AnimationType.Input)
+                    var currentOutputAnimation : AnimationItem? = mCurrentItemView!!.getCurrentOutputAnimator()
+                    mAnimationOption?.findAnimation(currentOutputAnimation?.itemIndex ?: 0,AnimationType.Output)
+                    var currentOverallAnimation : AnimationItem? = mCurrentItemView!!.getCurrentOverallAnimator()
+                    mAnimationOption?.findAnimation(currentOverallAnimation?.itemIndex ?: 0,AnimationType.Overall)
                     lsq_text_input.setText(mCurrentItemView!!.getCurrentText())
+                    if (mCurrentItemView!!.getTextShadow() != null){
+                        mShadowOption?.setShadowValue(mCurrentItemView!!.getTextShadow()!!)
+                    }
                 }
 
                 override fun onItemViewReleased(type: LayerType, view: LayerItemViewBase) {
@@ -759,7 +932,7 @@ class TextStickerActivity : BaseActivity() {
                     if (isFirstCallSoftInput) {
                         isFirstCallSoftInput = false
                     } else {
-                        lsq_text_input_layer.visibility = View.VISIBLE
+//                        lsq_text_input_layer.visibility = View.VISIBLE
                         lsq_text_input.requestFocus()
                         showSoftInput()
                     }
@@ -850,6 +1023,10 @@ class TextStickerActivity : BaseActivity() {
             (mOptionView.lsq_editor_text_alpha_seek_font as TuSeekBar).setDelegate { seekBar, progress ->
                 mCurrentItemView?.updateTextAlpha(progress.toDouble())
             }
+
+            if (mCurrentItemView!= null){
+                setAlphaPercent(mCurrentItemView!!.getTextAlpha())
+            }
         }
 
         public fun getOptionView(): View {
@@ -859,6 +1036,10 @@ class TextStickerActivity : BaseActivity() {
                 mCurrentItemView!!.getTextAlpha().toFloat()
             }
             return mOptionView
+        }
+
+        public fun setAlphaPercent(alpha : Double){
+            (mOptionView.lsq_editor_text_alpha_seek_font as TuSeekBar).progress = alpha.toFloat()
         }
     }
 
@@ -885,10 +1066,30 @@ class TextStickerActivity : BaseActivity() {
                 }
 
             })
+
+            if (mCurrentItemView != null){
+                setStrokeColor(mCurrentItemView!!.getStrokeColor())
+
+                setStrokeWidth(mCurrentItemView!!.getStrokeWidth())
+            }
+
+
         }
 
         public fun getOptionView(): View {
             return mOptionView
+        }
+
+        public fun setStrokeColor(color : Int){
+            runOnUiThread {
+                mOptionView.lsq_editor_text_stroke_color.findColorInt(color)
+            }
+        }
+
+        public fun setStrokeWidth(width : Double){
+            runOnUiThread {
+                (mOptionView.lsq_editor_text_stroke_alpha_seek as TuSeekBar).progress = (width / MAX_STROKE_WIDTH).toFloat()
+            }
         }
     }
 
@@ -901,7 +1102,7 @@ class TextStickerActivity : BaseActivity() {
             }
             val alphaSeek: TuSeekBar = mOptionView.lsq_editor_text_bg_seek as TuSeekBar
             alphaSeek.setDelegate { seekBar, progress ->
-                mCurrentItemView?.updateBackgroundAlpha((255 * progress).toInt())
+                mCurrentItemView?.updateBackgroundAlpha(progress.toDouble())
             }
             val colorView = mOptionView.lsq_editor_text_bg_color
             colorView.setCircleRadius(8)
@@ -911,18 +1112,11 @@ class TextStickerActivity : BaseActivity() {
                 }
 
                 override fun changePosition(percent: Float) {
-                    if (percent > 0){
-                        alphaSeek.enabled = true
-                        alphaSeek.progress = 1f
-                    } else {
-                        alphaSeek.enabled = false
-                        alphaSeek.progress = 0f
-                    }
-
                 }
             })
+            alphaSeek.progress = 0F
             if (mCurrentItemView != null){
-                colorView.findColorInt(mCurrentItemView!!.getBackgroundColor())
+                findColor(mCurrentItemView!!.getBackgroundColor())
             }
 
         }
@@ -941,7 +1135,7 @@ class TextStickerActivity : BaseActivity() {
             val b = Color.blue(color)
             mOptionView.lsq_editor_text_bg_color.findColorInt(color)
             mOptionView.lsq_editor_text_bg_color.postInvalidate()
-            (mOptionView.lsq_editor_text_bg_seek as TuSeekBar).progress = (alpha / 255f).toFloat()
+            (mOptionView.lsq_editor_text_bg_seek as TuSeekBar).progress = mCurrentItemView!!.getBackgroundOpacity().toFloat()
 
         }
 
@@ -950,21 +1144,41 @@ class TextStickerActivity : BaseActivity() {
 
     inner class TextSpacingOption {
         private var mOptionView = LayoutInflater.from(this@TextStickerActivity).inflate(R.layout.lsq_editor_component_text_spacing, null)
+        
+        private final val MAX_LINE_SPECING = 2.0
+
+        private final val MIN_LINE_SPECING = 0.5
 
         init {
             mOptionView.lsq_editor_component_text_spacing_back.setOnClickListener {
                 backToMain()
             }
             (mOptionView.lsq_editor_text_row_seek as TuSeekBar).setDelegate { seekBar, progress ->
-                mCurrentItemView?.updateLineSpacing(progress.toDouble())
+                mCurrentItemView?.updateLineSpacing(MIN_LINE_SPECING + (progress.toDouble() * (MAX_LINE_SPECING - MIN_LINE_SPECING)))
             }
             (mOptionView.lsq_editor_text_word_seek as TuSeekBar).setDelegate { seekBar, progress ->
-                mCurrentItemView?.updateWordSpacing(progress.toDouble())
+                mCurrentItemView?.updateWordSpacing(MIN_LINE_SPECING +(progress.toDouble() * (MAX_LINE_SPECING - MIN_LINE_SPECING)))
             }
+
+            if (mCurrentItemView != null){
+                updateLineSpacing(mCurrentItemView!!.getLineSpacing())
+                updateWordSpacing(mCurrentItemView!!.getWordSpacing())
+            }
+
         }
 
         public fun getOptionView(): View {
             return mOptionView
+        }
+
+        public fun updateLineSpacing(spacing : Double){
+            val value = (spacing - MIN_LINE_SPECING) / (MAX_LINE_SPECING - MIN_LINE_SPECING)
+            (mOptionView.lsq_editor_text_row_seek as TuSeekBar).progress = value.toFloat()
+        }
+
+        public fun updateWordSpacing(spacing : Double){
+            val value = (spacing - MIN_LINE_SPECING)  / (MAX_LINE_SPECING - MIN_LINE_SPECING)
+            (mOptionView.lsq_editor_text_word_seek as TuSeekBar).progress = value.toFloat()
         }
     }
 
@@ -977,25 +1191,61 @@ class TextStickerActivity : BaseActivity() {
             }
             mOptionView.lsq_editor_text_leftalignment.setOnClickListener {
                 mThreadPool.execute {
-                    mCurrentItemView?.updateTextAlign(Text2DClip.Alignment.LEFT)
+                    mCurrentItemView?.updateTextAlign(AnimationTextClip.Alignment.LEFT)
                 }
+
+                updateAlign(AnimationTextClip.Alignment.LEFT)
             }
             mOptionView.lsq_editor_text_centeralignment.setOnClickListener {
                 mThreadPool.execute {
-                    mCurrentItemView?.updateTextAlign(Text2DClip.Alignment.CENTER)
+                    mCurrentItemView?.updateTextAlign(AnimationTextClip.Alignment.CENTER)
 
                 }
+
+                updateAlign(AnimationTextClip.Alignment.CENTER)
             }
             mOptionView.lsq_editor_text_rightalignment.setOnClickListener {
                 mThreadPool.execute {
-                    mCurrentItemView?.updateTextAlign(Text2DClip.Alignment.RIGHT)
-
+                    mCurrentItemView?.updateTextAlign(AnimationTextClip.Alignment.RIGHT)
                 }
+
+                updateAlign(AnimationTextClip.Alignment.RIGHT)
+            }
+
+            if (mCurrentItemView!= null){
+                updateAlign(mCurrentItemView!!.getTextAlign())
             }
         }
 
         public fun getOptionView(): View {
             return mOptionView
+        }
+
+        public fun updateAlign(alignment : AnimationTextClip.Alignment){
+            mOptionView.leftalignment_icon.setImageResource(R.drawable.edit_text_ic_left)
+            mOptionView.leftalignment_title.setTextColor(Color.WHITE)
+
+            mOptionView.centeralignment_icon.setImageResource(R.drawable.edit_text_ic_center)
+            mOptionView.centeralignment_title.setTextColor(Color.WHITE)
+
+            mOptionView.rightalignment_icon.setImageResource(R.drawable.edit_text_ic_right)
+            mOptionView.rightalignment_title.setTextColor(Color.WHITE)
+
+            when(alignment){
+                AnimationTextClip.Alignment.LEFT -> {
+                    mOptionView.leftalignment_icon.setImageResource(R.drawable.t_ic_left_sel)
+                    mOptionView.leftalignment_title.setTextColor(Color.parseColor("#f6a623"))
+                }
+                AnimationTextClip.Alignment.CENTER -> {
+                    mOptionView.centeralignment_icon.setImageResource(R.drawable.t_ic_centered_sel)
+                    mOptionView.centeralignment_title.setTextColor(Color.parseColor("#f6a623"))
+                }
+                AnimationTextClip.Alignment.RIGHT -> {
+                    mOptionView.rightalignment_icon.setImageResource(R.drawable.t_ic_right_sel)
+                    mOptionView.rightalignment_title.setTextColor(Color.parseColor("#f6a623"))
+                }
+            }
+
         }
     }
 
@@ -1027,7 +1277,7 @@ class TextStickerActivity : BaseActivity() {
 
 
             mOptionView.lsq_editor_text_lefttoright.setOnClickListener {
-                if (!mCurrentItemView!!.isTextReverse()) {
+                if (mCurrentItemView!!.isTextReverse()) {
                     mThreadPool.execute {
                         mCurrentItemView?.textReverse(true)
                     }
@@ -1037,7 +1287,7 @@ class TextStickerActivity : BaseActivity() {
             }
 
             mOptionView.lsq_editor_text_righttoleft.setOnClickListener {
-                if (mCurrentItemView!!.isTextReverse()) {
+                if (!mCurrentItemView!!.isTextReverse()) {
                     isLeft = false
                     mThreadPool.execute {
                         mCurrentItemView?.textReverse(false)
@@ -1077,14 +1327,9 @@ class TextStickerActivity : BaseActivity() {
                 backToMain()
             }
             mOptionView.lsq_editor_text_underline.setOnClickListener {
-                isUnderLine = !isUnderLine
+                isUnderLine = true
                 var res : Future<Boolean> = mThreadPool.submit(Callable<Boolean> {
-                    mCurrentItemView?.updateTextStyle(if (isUnderLine) {
-                        Text2DClip.Style.UNDERLINE
-                    } else {
-                        Text2DClip.Style.NORMAL
-                    })
-
+                    mCurrentItemView?.updateTextStyle(isUnderLine)
                     true
                 })
                 res.get()
@@ -1092,9 +1337,17 @@ class TextStickerActivity : BaseActivity() {
             }
 
             mOptionView.lsq_editor_text_normal.setOnClickListener {
-                mCurrentItemView?.updateTextStyle(Text2DClip.Style.NORMAL)
+                mCurrentItemView?.updateTextStyle(false)
                 (mOptionView.lsq_editor_text_underline.getChildAt(0) as ImageView).setImageResource(R.drawable.t_ic_underline_nor)
                 (mOptionView.lsq_editor_text_underline.getChildAt(1) as TextView).setTextColor(Color.WHITE)
+
+                (mOptionView.lsq_editor_text_normal.getChildAt(0) as ImageView).setImageResource(R.drawable.t_ic_nor_sel)
+                (mOptionView.lsq_editor_text_normal.getChildAt(1) as TextView).setTextColor(Color.parseColor("#f6a623"))
+                isUnderLine = false
+            }
+
+            if (mCurrentItemView!= null){
+                updateUnderline(mCurrentItemView!!.isUnderLine())
             }
         }
 
@@ -1103,9 +1356,15 @@ class TextStickerActivity : BaseActivity() {
             if (isunderline) {
                 (mOptionView.lsq_editor_text_underline.getChildAt(0) as ImageView).setImageResource(R.drawable.t_ic_underline_sel)
                 (mOptionView.lsq_editor_text_underline.getChildAt(1) as TextView).setTextColor(Color.parseColor("#f6a623"))
+
+                (mOptionView.lsq_editor_text_normal.getChildAt(0) as ImageView).setImageResource(R.drawable.t_ic_nor_nor)
+                (mOptionView.lsq_editor_text_normal.getChildAt(1) as TextView).setTextColor(Color.WHITE)
             } else {
                 (mOptionView.lsq_editor_text_underline.getChildAt(0) as ImageView).setImageResource(R.drawable.t_ic_underline_nor)
                 (mOptionView.lsq_editor_text_underline.getChildAt(1) as TextView).setTextColor(Color.WHITE)
+
+                (mOptionView.lsq_editor_text_normal.getChildAt(0) as ImageView).setImageResource(R.drawable.t_ic_nor_sel)
+                (mOptionView.lsq_editor_text_normal.getChildAt(1) as TextView).setTextColor(Color.parseColor("#f6a623"))
             }
         }
 
@@ -1142,8 +1401,9 @@ class TextStickerActivity : BaseActivity() {
             val blendModes = mutableListOf<String>(
                     Layer.BLEND_MODE_Default,
                     Layer.BLEND_MODE_Normal,
+                    Layer.BLEND_MODE_Overlay,
                     Layer.BLEND_MODE_Add,
-                    Layer.BLEND_MODE_Substract,
+                    Layer.BLEND_MODE_Subtract,
                     Layer.BLEND_MODE_Negation,
                     Layer.BLEND_MODE_Average,
                     Layer.BLEND_MODE_Multiply,
@@ -1151,9 +1411,10 @@ class TextStickerActivity : BaseActivity() {
                     Layer.BLEND_MODE_Screen,
                     Layer.BLEND_MODE_Softlight,
                     Layer.BLEND_MODE_Hardlight,
+                    Layer.BLEND_MODE_Linearlight,
+                    Layer.BLEND_MODE_Pinlight,
                     Layer.BLEND_MODE_Lighten,
                     Layer.BLEND_MODE_Darken,
-                    Layer.BLEND_MODE_Reflect,
                     Layer.BLEND_MODE_Exclusion
             )
             val blendAdapter = BlendAdapter(blendModes, this@TextStickerActivity)
@@ -1210,6 +1471,500 @@ class TextStickerActivity : BaseActivity() {
 
         public fun setBlendMix(mix : Double){
             mOptionView.lsq_blend_mix_bar.progress = (mix * 100).toInt()
+        }
+    }
+
+
+    enum class AnimationType{
+        Input,Output,Overall
+    }
+
+    inner class TextAnimationOption{
+
+
+
+        private var mOptionView : View = LayoutInflater.from(this@TextStickerActivity).inflate(R.layout.lsq_editor_component_text_anitext_out,null)
+
+        private var mInputAnimationAdapter : AnimationAdapter? = null
+
+        private var mOutputAnimationAdapter : AnimationAdapter? = null
+
+        private var mOverallAnimationAdapter : AnimationAdapter? = null
+
+        private var mInputAnimationStartPos = 0.0
+
+        private var mInputAnimationEndPos = 0.1
+
+        private var mOutputAnimationStartPos = 0.9
+
+        private var mOutputAnimationEndPos = 1.0
+
+        private var mOverallAnimationStartPos = 0.0
+
+        private var mOverallAnimationEndPos = 1.0
+
+        private var mInputAnimationItem : AnimationItem? = null
+
+        private var mOutputAnimationItem : AnimationItem? = null
+
+        private var mOverallAnimationItem : AnimationItem? = null
+
+        public var mCurrentAnimationType : AnimationType = AnimationType.Input
+
+        init {
+            mOptionView.lsq_editor_component_text_font_back.setOnClickListener {
+                backToMain()
+            }
+
+            val animationAdapter = AnimationAdapter(Output_Animation_List,this@TextStickerActivity)
+            animationAdapter.setOnItemClickListener(object : OnItemClickListener<AnimationItem, AnimationAdapter.AnimationViewHolder>{
+                override fun onItemClick(pos: Int, holder: AnimationAdapter.AnimationViewHolder, item: AnimationItem) {
+                    mOutputAnimationItem = item
+                    mCurrentItemView?.addOutputAnimator(mOutputAnimationStartPos,mOutputAnimationEndPos,item)
+                    animationAdapter.setCurrentPosition(pos)
+                }
+            })
+
+            val layoutManager = LinearLayoutManager(this@TextStickerActivity)
+            layoutManager.orientation = LinearLayoutManager.HORIZONTAL
+            mOptionView.lsq_anitext_out_list.layoutManager = layoutManager
+
+
+            mOutputAnimationAdapter = animationAdapter
+
+            val inputAnimationAdapter = AnimationAdapter(Input_Animation_List,this@TextStickerActivity)
+            inputAnimationAdapter.setOnItemClickListener(object : OnItemClickListener<AnimationItem, AnimationAdapter.AnimationViewHolder>{
+                override fun onItemClick(pos: Int, holder: AnimationAdapter.AnimationViewHolder, item: AnimationItem) {
+                    mInputAnimationItem = item
+                    mCurrentItemView?.addInputAnimator(mInputAnimationStartPos,mInputAnimationEndPos,item)
+                    inputAnimationAdapter.setCurrentPosition(pos)
+                }
+
+            })
+            mOptionView.lsq_anitext_out_list.adapter = inputAnimationAdapter
+
+            mInputAnimationAdapter = inputAnimationAdapter
+
+            val overallAnimationAdapter = AnimationAdapter(Overall_Animation_List,this@TextStickerActivity)
+            overallAnimationAdapter.setOnItemClickListener(object : OnItemClickListener<AnimationItem, AnimationAdapter.AnimationViewHolder>{
+                override fun onItemClick(pos: Int, holder: AnimationAdapter.AnimationViewHolder, item: AnimationItem) {
+                    mOverallAnimationItem = item
+                    mCurrentItemView?.addOverallAnimator(mOverallAnimationStartPos,mOverallAnimationEndPos,item)
+                    overallAnimationAdapter.setCurrentPosition(pos)
+                }
+
+            })
+
+            mOverallAnimationAdapter = overallAnimationAdapter
+
+            mOptionView.lsq_anitext_input_title.setTextColor(Color.RED)
+
+            mOptionView.lsq_anitext_input_title.setOnClickListener {
+                mOptionView.lsq_anitext_out_list.adapter = mInputAnimationAdapter
+                mCurrentAnimationType = AnimationType.Input
+
+
+                mOptionView.lsq_anitext_input_title.setTextColor(Color.RED)
+                mOptionView.lsq_anitext_output_title.setTextColor(Color.WHITE)
+                mOptionView.lsq_anitext_all_title.setTextColor(Color.WHITE)
+
+                mOptionView.lsq_anitext_out_duration_bar.seekBarMode = RangeSeekBar.SEEKBAR_MODE_RANGE
+
+                mOptionView.lsq_anitext_out_duration_bar.progressDefaultColor = getColor(R.color.lsq_seek_value_color)
+                mOptionView.lsq_anitext_out_duration_bar.progressColor = getColor(R.color.lsq_icon_set_color)
+
+                setDuration(mInputAnimationEndPos,mOutputAnimationStartPos,mCurrentAnimationType)
+
+                setDurationRange(mInputAnimationEndPos,mOutputAnimationStartPos)
+
+                mOptionView.lsq_anitxt_duration_title.setText("进入/退出 :")
+
+
+
+
+                refreshItems()
+
+            }
+
+            mOptionView.lsq_anitext_output_title.setOnClickListener {
+                mOptionView.lsq_anitext_out_list.adapter = mOutputAnimationAdapter
+                mCurrentAnimationType = AnimationType.Output
+
+
+                mOptionView.lsq_anitext_input_title.setTextColor(Color.WHITE)
+                mOptionView.lsq_anitext_output_title.setTextColor(Color.RED)
+                mOptionView.lsq_anitext_all_title.setTextColor(Color.WHITE)
+
+                mOptionView.lsq_anitext_out_duration_bar.seekBarMode = RangeSeekBar.SEEKBAR_MODE_RANGE
+
+                mOptionView.lsq_anitext_out_duration_bar.progressDefaultColor = getColor(R.color.lsq_seek_value_color)
+                mOptionView.lsq_anitext_out_duration_bar.progressColor = getColor(R.color.lsq_icon_set_color)
+
+                setDuration(mInputAnimationEndPos,mOutputAnimationStartPos,mCurrentAnimationType)
+
+                setDurationRange(mInputAnimationEndPos,mOutputAnimationStartPos)
+
+                mOptionView.lsq_anitxt_duration_title.setText("进入/退出 :")
+
+
+
+
+                refreshItems()
+            }
+
+            mOptionView.lsq_anitext_all_title.setOnClickListener {
+                mOptionView.lsq_anitext_out_list.adapter = mOverallAnimationAdapter
+                mCurrentAnimationType = AnimationType.Overall
+
+                mOptionView.lsq_anitext_input_title.setTextColor(Color.WHITE)
+                mOptionView.lsq_anitext_output_title.setTextColor(Color.WHITE)
+                mOptionView.lsq_anitext_all_title.setTextColor(Color.RED)
+
+                mOptionView.lsq_anitext_out_duration_bar.seekBarMode = RangeSeekBar.SEEKBAR_MODE_RANGE
+
+                mOptionView.lsq_anitext_out_duration_bar.progressColor = getColor(R.color.lsq_seek_value_color)
+                mOptionView.lsq_anitext_out_duration_bar.progressDefaultColor = getColor(R.color.lsq_icon_set_color)
+
+
+                setDuration(mOverallAnimationStartPos,mOverallAnimationEndPos,mCurrentAnimationType)
+
+                setDurationRange(mOverallAnimationStartPos,mOverallAnimationEndPos)
+
+                mOptionView.lsq_anitxt_duration_title.setText("动画时长 :")
+
+
+
+                refreshItems()
+
+            }
+
+            mOptionView.lsq_anitext_out_duration_bar.setRange(0f,100f)
+            mOptionView.lsq_anitext_out_duration_bar.setOnRangeChangedListener(object : OnRangeChangedListener {
+                override fun onRangeChanged(view: RangeSeekBar?, leftValue: Float, rightValue: Float, isFromUser: Boolean) {
+                    if (!isFromUser) return
+                    when(mCurrentAnimationType){
+                        AnimationType.Input,AnimationType.Output -> {
+                            mInputAnimationEndPos = (leftValue / 100f).toDouble()
+                            if (mInputAnimationItem != null){
+                                mCurrentItemView?.addInputAnimator(mInputAnimationStartPos,mInputAnimationEndPos,mInputAnimationItem!!)
+                            }
+
+                            mOutputAnimationStartPos = (rightValue / 100f).toDouble()
+                            if (mOutputAnimationItem != null){
+                                mCurrentItemView?.addOutputAnimator(mOutputAnimationStartPos,mOutputAnimationEndPos, mOutputAnimationItem!!)
+                            }
+                            setDurationRange(mInputAnimationEndPos,mOutputAnimationStartPos)
+                        }
+                        AnimationType.Overall -> {
+                            mOverallAnimationStartPos = (leftValue / 100f).toDouble()
+                            mOverallAnimationEndPos = (rightValue / 100f).toDouble()
+                            if (mOverallAnimationItem != null){
+                                mCurrentItemView?.addOverallAnimator(mOverallAnimationStartPos,mOverallAnimationEndPos, mOverallAnimationItem!!)
+                            }
+                            setDurationRange(mOverallAnimationStartPos,mOverallAnimationEndPos)
+                        }
+                    }
+                }
+
+                override fun onStartTrackingTouch(view: RangeSeekBar?, isLeft: Boolean) {
+
+                }
+
+                override fun onStopTrackingTouch(view: RangeSeekBar?, isLeft: Boolean) {
+
+                }
+
+            })
+
+            mOptionView.lsq_anitext_out_duration_bar.seekBarMode = RangeSeekBar.SEEKBAR_MODE_RANGE
+            mOptionView.lsq_anitext_out_duration_bar.progressDefaultColor = getColor(R.color.lsq_seek_value_color)
+            mOptionView.lsq_anitext_out_duration_bar.progressColor = getColor(R.color.lsq_icon_set_color)
+
+            if (mCurrentItemView != null){
+                when(mCurrentAnimationType){
+                    AnimationType.Input,AnimationType.Output -> {
+                        mOptionView.lsq_anitext_out_duration_bar.setProgress(mInputAnimationEndPos.toFloat() * 100,mOutputAnimationStartPos.toFloat() * 100)
+                        setDurationRange(mInputAnimationEndPos,mOutputAnimationStartPos)
+                    }
+                    AnimationType.Overall -> {
+                        mOptionView.lsq_anitext_out_duration_bar.setProgress(mOverallAnimationStartPos.toFloat(), mOverallAnimationEndPos.toFloat())
+                        setDurationRange(mOverallAnimationStartPos,mOverallAnimationEndPos)
+                    }
+                }
+                mOptionView.lsq_anitext_out_duration_bar.invalidate()
+
+                val list = mCurrentItemView!!.getAnimatorList()
+                if (list.isNotEmpty()) for (item in list){
+                    mInputAnimationAdapter!!.findAnimation(item.path)
+                    var currentIndex = mInputAnimationAdapter!!.getCurrentPosition()
+                    if (currentIndex != -1){
+                        mInputAnimationStartPos = item.start
+                        mInputAnimationEndPos = item.end
+                        mInputAnimationItem = Input_Animation_List[currentIndex]
+                        mCurrentItemView?.addInputAnimator(mInputAnimationStartPos,mInputAnimationEndPos,mInputAnimationItem!!)
+                    }
+                    mOutputAnimationAdapter!!.findAnimation(item.path)
+                    currentIndex = mOutputAnimationAdapter!!.getCurrentPosition()
+                    if (currentIndex != -1){
+                        mOutputAnimationStartPos = item.start
+                        mOutputAnimationEndPos = item.end
+                        mOutputAnimationItem = Output_Animation_List[currentIndex]
+                        mCurrentItemView?.addOutputAnimator(mOutputAnimationStartPos,mOutputAnimationEndPos, mOutputAnimationItem!!)
+                    }
+                    mOverallAnimationAdapter!!.findAnimation(item.path)
+                    currentIndex = mOverallAnimationAdapter!!.getCurrentPosition()
+                    if (currentIndex != -1){
+                        mOverallAnimationStartPos = item.start
+                        mOverallAnimationEndPos = item.end
+                        mOverallAnimationItem = Overall_Animation_List[currentIndex]
+                        mCurrentItemView?.addOverallAnimator(mOverallAnimationStartPos,mOverallAnimationEndPos, mOverallAnimationItem!!)
+                    }
+                }
+
+                refreshItems()
+
+
+
+            }
+        }
+
+        public fun refreshDurationRange(){
+            when(mCurrentAnimationType){
+                AnimationType.Input,AnimationType.Output -> {
+                    setDurationRange(mInputAnimationEndPos,mOutputAnimationStartPos)
+                }
+                AnimationType.Overall -> {
+                    setDurationRange(mOverallAnimationStartPos,mOverallAnimationEndPos)
+                }
+            }
+        }
+
+        private fun setDurationRange(start: Double,end: Double) {
+            val maxDuration = mCurrentItemView!!.getClipDuration()
+
+            val startTs = (start * maxDuration)
+
+            val m = startTs / 1000 / 60
+
+            val s = startTs / 1000 % 60
+
+            val endTs = (end * maxDuration)
+
+            val em = endTs / 1000 / 60
+
+            val es = endTs / 1000 % 60
+
+            val maxDm = maxDuration / 1000 / 60
+            val maxDs = maxDuration / 1000 % 60
+
+            when(mCurrentAnimationType){
+                AnimationType.Input,AnimationType.Output -> {
+                    mOptionView.lsq_animation_start_time.setText(
+                            "进入动画 开始 : 00:00 结束 : ${String.format("%02d",m.toInt())}:${String.format("%02d",s.toInt())}"
+                    )
+                    mOptionView.lsq_animation_end_time.setText(
+                            "退出动画 开始 : ${String.format("%02d",em.toInt())}:${String.format("%02d",es.toInt())} 结束 : ${String.format("%02d",maxDm.toInt())}:${String.format("%02d",maxDs.toInt())}"
+                    )
+                }
+                AnimationType.Overall -> {
+                    mOptionView.lsq_animation_start_time.setText(
+                            "整体动画 开始 : ${String.format("%02d",m.toInt())}:${String.format("%02d",s.toInt())} 结束 : ${String.format("%02d",em.toInt())}:${String.format("%02d",es.toInt())}"
+                    )
+                    mOptionView.lsq_animation_end_time.setText("")
+                }
+            }
+
+
+        }
+
+        private fun refreshItems() {
+            var currentOutputAnimation: AnimationItem? = mCurrentItemView!!.getCurrentOutputAnimator()
+            mOutputAnimationAdapter?.findAnimation(currentOutputAnimation?.itemIndex ?: 0)
+
+            var currentInputAnimation: AnimationItem? = mCurrentItemView!!.getCurrentInputAnimator()
+            mInputAnimationAdapter?.findAnimation(currentInputAnimation?.itemIndex ?: 0)
+            var currentOverallAnimation: AnimationItem? = mCurrentItemView!!.getCurrentOverallAnimator()
+            mOverallAnimationAdapter?.findAnimation(currentOverallAnimation?.itemIndex ?: 0)
+        }
+
+
+        fun findAnimation(index : Int,type : AnimationType){
+            when(type){
+                AnimationType.Input ->
+                {
+                    mInputAnimationAdapter?.findAnimation(index)
+                }
+                AnimationType.Output ->
+                {
+                    mOutputAnimationAdapter?.findAnimation(index)
+                }
+                AnimationType.Overall ->
+                {
+                    mOverallAnimationAdapter?.findAnimation(index)
+                }
+            }
+
+        }
+
+        public fun getOptionView() : View{
+            return mOptionView
+        }
+
+        public fun setDuration(start : Double,end : Double,type : AnimationType){
+
+            var startPos = start
+            var endPos = end
+
+
+            when(type){
+                AnimationType.Input,AnimationType.Output -> {
+                    mInputAnimationEndPos = start
+                    mOutputAnimationStartPos = end
+                }
+                AnimationType.Overall -> {
+                    mOverallAnimationStartPos = start
+                    mOverallAnimationEndPos = end
+                }
+            }
+            when(mCurrentAnimationType){
+                AnimationType.Input,AnimationType.Output -> {
+                    mOptionView.lsq_anitext_out_duration_bar.setProgress(mInputAnimationEndPos.toFloat() * 100,mOutputAnimationStartPos.toFloat() * 100)
+                }
+                AnimationType.Overall -> {
+                    mOptionView.lsq_anitext_out_duration_bar.setProgress(mOverallAnimationStartPos.toFloat() * 100, mOverallAnimationEndPos.toFloat() * 100)
+                }
+            }
+            mOptionView.lsq_anitext_out_duration_bar.invalidate()
+        }
+    }
+
+    inner class TextShadowOption{
+        private var mOptionView : View = LayoutInflater.from(this@TextStickerActivity).inflate(R.layout.lsq_editor_component_text_shadow,null)
+
+        private var shadowItem : AnimationTextClip.Shadow = AnimationTextClip.Shadow()
+
+        init {
+            mOptionView.lsq_editor_component_text_font_back.setOnClickListener {
+                backToMain()
+            }
+
+            mOptionView.lsq_shadow_color_bar.setOnColorChangeListener(object : ColorView.OnColorChangeListener{
+                override fun changeColor(colorId: Int) {
+                    shadowItem.color = colorId
+                    mCurrentItemView?.updateTextShadow(shadowItem)
+                }
+
+                override fun changePosition(percent: Float) {
+
+                }
+
+            })
+
+            mOptionView.lsq_shadow_opacity_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    shadowItem.opacity = progress / 100.0
+                    mCurrentItemView?.updateTextShadow(shadowItem)
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+            })
+
+            mOptionView.lsq_shadow_blur_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    shadowItem.blur = progress / 100.0
+                    mCurrentItemView?.updateTextShadow(shadowItem)
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+            })
+
+            mOptionView.lsq_shadow_distance_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    shadowItem.distance = progress
+                    mCurrentItemView?.updateTextShadow(shadowItem)
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+            })
+
+            mOptionView.lsq_shadow_degree_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    shadowItem.degree = progress
+                    mCurrentItemView?.updateTextShadow(shadowItem)
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+            })
+
+            if (mCurrentItemView != null && mCurrentItemView!!.getTextShadow() != null){
+                setShadowValue(mCurrentItemView!!.getTextShadow()!!)
+            }
+        }
+
+        public fun getOptionView() : View{
+            return mOptionView
+        }
+
+        public fun setShadowValue(shadow : AnimationTextClip.Shadow){
+            mOptionView.lsq_shadow_color_bar.findColorInt(shadow.color)
+            mOptionView.lsq_shadow_opacity_bar.progress = (shadow.opacity * 100).toInt()
+            mOptionView.lsq_shadow_blur_bar.progress = (shadow.blur * 100).toInt()
+            mOptionView.lsq_shadow_distance_bar.progress = shadow.distance
+            mOptionView.lsq_shadow_degree_bar.progress = shadow.degree
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        playerPause()
+
+        if (mCurrentProducer != null){
+            mThreadPool.execute {
+                isNeedSave = false
+                mCurrentProducer?.cancel()
+                FileHelper.delete(File(mCurrentSavePath))
+                mCurrentProducer = null
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!Engine.getInstance().checkEGL()){
+            throw Exception("dsssssssssssssssss");
         }
     }
 

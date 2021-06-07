@@ -38,6 +38,8 @@ import org.lasque.tusdkeditoreasydemo.base.VideoItem
 import org.lasque.tusdkpulse.core.TuSdk
 import org.lasque.tusdkpulse.core.utils.StringHelper
 import java.io.File
+import java.util.concurrent.Callable
+import java.util.concurrent.Future
 import java.util.concurrent.Semaphore
 
 /**
@@ -82,7 +84,7 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
     }
 
     override fun initView(view: View, savedInstanceState: Bundle?) {
-        mThreadPool!!.execute {
+        val res : Future<Boolean> = mThreadPool!!.submit (Callable<Boolean>{
             if (!restoreLayer()) {
                 initLayer()
             }
@@ -90,9 +92,6 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
             val videoPath = mVideoClip!!.config.getString(VideoFileClip.CONFIG_PATH)
             mMaxDuration = MediaInspector.shared().inspect(videoPath).streams[0].duration
             TLog.e("max percent max duration ${mMaxDuration}")
-
-
-
             runOnUiThread {
                 view.lsq_start_bar.setCallBack(object : DoubleHeadedDragonBar.DhdBarCallBack() {
                     override fun getMaxString(value: Int): String {
@@ -149,8 +148,15 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
                     view.lsq_start_bar.maxValue = ((mEndTime / mMaxDuration.toDouble()) * 100).toInt()
                     view.lsq_start_bar.invalidate()
                 }
+
+                mOnPlayerStateUpdateListener?.onDurationUpdate()
             }
-        }
+
+            true
+        })
+
+        res.get()
+
     }
 
     private fun restoreLayer(): Boolean {
@@ -229,7 +235,7 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
 //        item.path = videoTranscoder(item.path)
 
 
-        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video,item.audioPath)
 
         val videoClip = mVideoItem!!.mVideoClip
         val audioClip = mVideoItem!!.mAudioClip

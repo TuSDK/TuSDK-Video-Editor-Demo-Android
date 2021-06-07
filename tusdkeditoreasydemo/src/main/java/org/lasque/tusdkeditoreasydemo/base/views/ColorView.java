@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.view.NestedScrollingChild;
 
 import org.lasque.tusdkpulse.core.TuSdkContext;
 import org.lasque.tusdkpulse.core.utils.TLog;
@@ -22,7 +23,7 @@ import org.lasque.tusdkeditoreasydemo.base.CUtils;
  * Created by tutu-penggao on 2018/9/18.
  */
 
-public class ColorView extends View {
+public class ColorView extends View{
 
     /**
      * 颜色背景图片
@@ -145,6 +146,7 @@ public class ColorView extends View {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_MOVE:
+                getParent().requestDisallowInterceptTouchEvent(true);
                 if ((int) event.getX() < mCircleX) {
                     moveX = 0;
                 } else if ((int) event.getX() > getRight() - mBitmapLeft - getLeft()-mCircleRadius) {
@@ -177,6 +179,7 @@ public class ColorView extends View {
                 invalidate();
                 return true;
             case MotionEvent.ACTION_CANCEL:
+                getParent().requestDisallowInterceptTouchEvent(false);
                 return false;
         }
         return super.onTouchEvent(event);
@@ -273,17 +276,13 @@ public class ColorView extends View {
         int move = 2;
         Bitmap colorBitmap = BitmapFactory.decodeResource(getResources(), R.drawable
                 .edit_ic_colorbar);
-        int targetA = Color.alpha(color);
-        int targetR = Color.red(color);
-        int targetG = Color.green(color);
-        int targetB = Color.blue(color);
         for (int i = 2; i < colorBitmap.getWidth(); i++) {
             int pixelBitmpa = colorBitmap.getPixel(i , 2);
             int resA = Color.alpha(pixelBitmpa);
             int resR = Color.red(pixelBitmpa);
             int resG = Color.green(pixelBitmpa);
             int resB = Color.blue(pixelBitmpa);
-            if (targetG == resG && targetB == resB && targetR == resR){
+            if (similarTo(pixelBitmpa,color)){
                 mInnerCircleColor = Color.argb(resA, resR, resG, resB);
                 move = i;
                 break;
@@ -299,5 +298,27 @@ public class ColorView extends View {
                 TLog.e("draw finalMove %s,color %s move x %s",finalMove,mInnerCircleColor,moveX);
             }
         };
+    }
+
+    private boolean similarTo(int resColor,int targetColor){
+        int targetR = Color.red(targetColor);
+        int targetG = Color.green(targetColor);
+        int targetB = Color.blue(targetColor);
+
+        int resR = Color.red(resColor);
+        int resG = Color.green(resColor);
+        int resB = Color.blue(resColor);
+
+        int disR = targetR - resR;
+        int disG = targetG - resG;
+        int disB = targetB - resB;
+
+        int distance = (disR * disR) + (disG * disG) + (disB * disB);
+
+        if (distance < 25){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

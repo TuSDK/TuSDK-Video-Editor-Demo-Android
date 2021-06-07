@@ -35,7 +35,7 @@ public class VideoItem(val path: String, val id: Long, val videoClip: Clip, val 
 
     companion object {
         private var Clip_Count = 0
-        fun createVideoItem(path: String, editor: VideoEditor, needResize: Boolean = true, isVideoClip: Boolean = true): VideoItem {
+        fun createVideoItem(path: String, editor: VideoEditor, needResize: Boolean = true, isVideoClip: Boolean = true,audioPath : String = path): VideoItem {
             if (isVideoClip) {
                 var hasAudio = true
                 val videoConfig = Config()
@@ -45,7 +45,7 @@ public class VideoItem(val path: String, val id: Long, val videoClip: Clip, val 
                 videoClip.setConfig(videoConfig)
 
                 val audioConfig = Config()
-                audioConfig.setString(AudioFileClip.CONFIG_PATH, path)
+                audioConfig.setString(AudioFileClip.CONFIG_PATH, audioPath)
                 var audioClip = Clip(editor.context, AudioFileClip.TYPE_NAME)
                 audioClip.setConfig(audioConfig)
                 if (needResize) {
@@ -78,7 +78,7 @@ public class VideoItem(val path: String, val id: Long, val videoClip: Clip, val 
                     resizeEffect.setConfig(resizeConfig)
                     videoClip.effects().add(50, resizeEffect)
                 }
-                val audioClip = Clip(editor.context,SilenceClip.TYPE_NAME)
+                var audioClip = Clip(editor.context,SilenceClip.TYPE_NAME)
                 val audioConfig = Config()
                 audioConfig.setNumber(SilenceClip.CONFIG_DURATION,3000)
                 audioClip.setConfig(audioConfig)
@@ -113,6 +113,10 @@ public class VideoItem(val path: String, val id: Long, val videoClip: Clip, val 
 
         fun resetID() {
             Clip_Count = 0
+        }
+
+        fun plusClipCount(size : Int){
+            Clip_Count+= size
         }
     }
 

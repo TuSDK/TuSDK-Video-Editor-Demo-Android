@@ -117,22 +117,37 @@ class ColorAdjustFragment : BaseFragment() {
         mAdjustEffect = videoClip.effects().get(10)
         val property : Property? = mAdjustEffect!!.getProperty(ColorAdjustEffect.PROP_PARAM)
         val holder = if (property == null)ColorAdjustEffect.PropertyHolder() else ColorAdjustEffect.PropertyHolder(property)
-        for (i in 0 until mAdjustList.size){
-            if (holder.items.isNotEmpty()){
+
+        if (holder.items.isNotEmpty()){
+            mAdjustList.clear()
+            for (i in 0 until holder.items.size){
                 val pItem = holder.items[i]
+                when(pItem.name){
+                    ColorAdjustEffect.PROP_TYPE_WhiteBalance -> {mAdjustList.add(ColorAdjustItem.WhiteBalance)}
+                    ColorAdjustEffect.PROP_TYPE_HighlightShadow -> {mAdjustList.add(ColorAdjustItem.HighlightShadow)}
+                    ColorAdjustEffect.PROP_TYPE_Sharpen -> {mAdjustList.add(ColorAdjustItem.Sharpen)}
+                    ColorAdjustEffect.PROP_TYPE_Brightness -> {mAdjustList.add(ColorAdjustItem.Brightness)}
+                    ColorAdjustEffect.PROP_TYPE_Contrast -> {mAdjustList.add(ColorAdjustItem.Contrast)}
+                    ColorAdjustEffect.PROP_TYPE_Saturation -> {mAdjustList.add(ColorAdjustItem.Saturation)}
+                    ColorAdjustEffect.PROP_TYPE_Exposure -> {mAdjustList.add(ColorAdjustItem.Exposure)}
+                }
+
                 for (index in pItem.values.indices){
                     mAdjustList[i].propertyItem.values[index] = pItem.values[index]
                     mAdjustList[i].params[index].defaultValue = pItem.values[index]
                 }
+
             }
         }
+
+
         mAdjustPropertyBuilder.holder.items = getPropertyItems()
         return true
     }
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
 
         val duration = mVideoItem!!.mVideoClip.streamInfo.duration
 

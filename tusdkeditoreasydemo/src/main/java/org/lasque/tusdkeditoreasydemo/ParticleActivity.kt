@@ -56,6 +56,7 @@ import org.lasque.tusdkeditoreasydemo.base.DraftItem
 import org.lasque.tusdkeditoreasydemo.base.OnItemClickListener
 import org.lasque.tusdkeditoreasydemo.base.views.ColorView
 import org.lasque.tusdkeditoreasydemo.utils.Constants
+import org.lasque.tusdkpulse.core.utils.FileHelper
 import java.io.File
 import java.util.*
 import java.util.concurrent.*
@@ -76,7 +77,7 @@ class ParticleActivity : BaseActivity() {
 
     private var mEditor: VideoEditor = VideoEditor()
 
-    private val mThreadPool: ExecutorService = Executors.newSingleThreadScheduledExecutor()
+    private val mThreadPool: ExecutorService = Executors.newSingleThreadExecutor()
 
     private var mPlayer: VideoEditor.Player? = null
 
@@ -196,6 +197,7 @@ class ParticleActivity : BaseActivity() {
             }
         }
         lsq_particle_layer.setOnTouchListener { view, motionEvent ->
+            TLog.e("current code ${mCurrentCode}")
 //            lsq_particle_layer.performClick()
             if (TextUtils.isEmpty(mCurrentCode)) return@setOnTouchListener false
             when (motionEvent.action) {
@@ -212,6 +214,7 @@ class ParticleActivity : BaseActivity() {
                         mParticlePropertyBuilder!!.holder.begin = mCurrentDuration
                         mParticlePropertyBuilder!!.holder.end = mMaxDuration
                         mParticlePropertyBuilder!!.holder.tint = lsq_particle_color_bar.selectColor
+                        mParticlePropertyBuilder!!.holder.scale = mParticleSize.toDouble()
                         mParticleEffect?.setProperty(TusdkParticleEffect.PROP_PARAM, mParticlePropertyBuilder!!.makeProperty())
                         mTouchStartTime = System.currentTimeMillis();
 //                        mSemaphore = Semaphore(0)
@@ -231,8 +234,13 @@ class ParticleActivity : BaseActivity() {
                 MotionEvent.ACTION_MOVE -> {
 
                     var res: Future<Boolean> = mThreadPool.submit(Callable<Boolean> {
+
+
                         if (TextUtils.isEmpty(mCurrentCode)) return@Callable false
                         val point = convertedPoint(motionEvent.x, motionEvent.y)
+
+                        TLog.e("current point ${point.x} : ${point.y}")
+
                         mParticlePropertyBuilder!!.holder.trajectory.add(point)
                         mParticlePosBuilder.posX = point.x
                         mParticlePosBuilder.posY = point.y
@@ -250,6 +258,9 @@ class ParticleActivity : BaseActivity() {
                         if (TextUtils.isEmpty(mCurrentCode)) return@Callable false
                         if (mPlayer!!.pause()) {
                         }
+                        mParticlePosBuilder.posX = -1.0
+                        mParticlePosBuilder.posY = -1.0
+                        mParticleEffect!!.setProperty(TusdkParticleEffect.PROP_PARTICLE_POS, mParticlePosBuilder.makeProperty())
                         mParticlePropertyBuilder!!.holder.end = mCurrentDuration
                         var ret = mParticleEffect!!.setProperty(TusdkParticleEffect.PROP_PARAM, mParticlePropertyBuilder!!.makeProperty())
                         mParticlePropertyBuilder!!.holder.trajectory.clear()
@@ -310,12 +321,21 @@ class ParticleActivity : BaseActivity() {
         }
     }
 
+    private var mCurrentProducer: VideoEditor.Producer? = null
+
+    private var mCurrentSavePath = ""
+
+    private var isNeedSave = true
+
     private fun saveVideo() {
+        isNeedSave = true
         val producer = mEditor.newProducer()
         //                val outputFilePath = "${TuSdkContext.context().getExternalFilesDir(DIRECTORY_DCIM)!!.absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
 
         val outputFilePath = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).absolutePath}/editor_output${System.currentTimeMillis()}.mp4"
         TLog.e("output path $outputFilePath")
+
+        mCurrentSavePath = outputFilePath
 
         val config = Producer.OutputConfig()
         config.watermark = BitmapHelper.getRawBitmap(this, R.raw.sample_watermark)
@@ -324,9 +344,10 @@ class ParticleActivity : BaseActivity() {
         producer.setListener { state, ts ->
             if (state == Producer.State.kEND) {
                 mThreadPool.execute {
-                    producer.cancel()
                     producer.release()
                     mEditor!!.resetProducer()
+                    mPlayer!!.seekTo(mCurrentDuration)
+                    mCurrentProducer = null
                 }
                 val contentValue = ImageSqlHelper.getCommonContentValues()
                 sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(File(outputFilePath))))
@@ -334,12 +355,14 @@ class ParticleActivity : BaseActivity() {
                     setEnable(true)
                     lsq_editor_cut_load.setVisibility(View.GONE)
                     lsq_editor_cut_load_parogress.setValue(0f)
-                    Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
+                    if (isNeedSave)
+                        Toast.makeText(applicationContext, "保存成功", Toast.LENGTH_SHORT).show()
                 }
             } else if (state == Producer.State.kWRITING) {
+                val currentp = (ts / producer.duration.toFloat()) * 100f
                 runOnUiThread {
                     lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                    lsq_editor_cut_load_parogress.setValue((ts / producer.duration.toFloat()) * 100f)
+                    lsq_editor_cut_load_parogress.setValue(currentp)
                 }
             }
         }
@@ -352,6 +375,7 @@ class ParticleActivity : BaseActivity() {
             TLog.e("[Error] EditorProducer Start failed")
 
         }
+        mCurrentProducer = producer
     }
 
     private fun saveDraft() {
@@ -399,7 +423,7 @@ class ParticleActivity : BaseActivity() {
 
     private fun playerPlay() {
         mThreadPool.execute {
-            mPlayer!!.play()
+            mPlayer?.play()
             runOnUiThread {
                 lsq_particle_play.setImageResource(R.mipmap.edit_ic_pause)
             }
@@ -408,7 +432,7 @@ class ParticleActivity : BaseActivity() {
 
     private fun playerPause() {
         mThreadPool.execute {
-            mPlayer!!.pause()
+            mPlayer?.pause()
             runOnUiThread {
                 lsq_particle_play.setImageResource(R.mipmap.edit_ic_play)
             }
@@ -419,6 +443,11 @@ class ParticleActivity : BaseActivity() {
         super.onResume()
     }
 
+    override fun onPause() {
+        super.onPause()
+        playerPause()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if ((requestCode == 1) and (resultCode == 1)) {
@@ -427,7 +456,7 @@ class ParticleActivity : BaseActivity() {
             if (albumList != null) {
                 mThreadPool.execute {
                     val item = albumList!![0]
-                    mVideoItem = VideoItem.createVideoItem(item.path, mEditor, true, item.type == AlbumItemType.Video)
+                    mVideoItem = VideoItem.createVideoItem(item.path, mEditor, true, item.type == AlbumItemType.Video,item.audioPath)
                     initLayer()
                     initPlayer()
                 }
@@ -446,8 +475,9 @@ class ParticleActivity : BaseActivity() {
         mPlayer?.setListener { state, ts ->
             mCurrentState = state
             if (state == Player.State.kDO_PLAY || state == Player.State.kDO_PAUSE) {
+                val durationMS = mPlayer!!.duration
                 runOnUiThread {
-                    val durationMS = mPlayer!!.duration
+
                     mMaxDuration = durationMS
                     seekBar.max = durationMS.toInt()
                 }
@@ -525,7 +555,7 @@ class ParticleActivity : BaseActivity() {
 
         mVideoItem = VideoItem(videoPath, videoId.toLong(), videoClip, audioClip)
 
-        mParticleId = videoClip.effects().all.keys.last() + 1
+        mParticleId += videoClip.effects().all.keys.size
 
         val duration = mVideoItem!!.mVideoClip.streamInfo.duration
         mVideoLayer = videoLayer
@@ -603,6 +633,21 @@ class ParticleActivity : BaseActivity() {
 
         })
         res.get()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        playerPause()
+
+        if (mCurrentProducer != null){
+            mThreadPool.execute {
+                isNeedSave = false
+                mCurrentProducer?.cancel()
+                FileHelper.delete(File(mCurrentSavePath))
+                mCurrentProducer = null
+            }
+        }
+
     }
 
 

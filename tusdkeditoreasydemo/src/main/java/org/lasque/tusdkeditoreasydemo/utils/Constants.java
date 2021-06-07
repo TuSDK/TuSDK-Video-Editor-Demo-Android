@@ -42,6 +42,12 @@ public class Constants {
 
     public static String TTF_KEY = "TTF-Path";
 
+    public static String BUBBLE_TTF_KEY = "BUBBLE-TTF-Path";
+
+    public static String BUBBLE_5 = "Bubble_5";
+    public static String BUBBLE_6 = "Bubble_6";
+    public static String BUBBLE_7 = "Bubble_7";
+
 
     /** 配音code列表 **/
     public static String[] AUDIO_EFFECTS_CODES = new String[]{"none","record","lively", "oldmovie", "relieve"};

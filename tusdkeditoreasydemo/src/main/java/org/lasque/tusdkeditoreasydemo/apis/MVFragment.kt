@@ -192,6 +192,7 @@ class MVFragment :BaseFragment(FunctionType.MVEffect) {
                                 val effect = Effect(mEditor!!.context,AudioRepeatEffectV2.TYPE_NAME)
                                 val effectConfig = Config()
                                 effectConfig.setNumber(AudioRepeatEffectV2.CONFIG_DURATION,mEndTime - mStartTime)
+                                TLog.e("start time ${mStartTime} end time ${mEndTime}")
                                 effect.setConfig(effectConfig)
                                 mMvAudioClip!!.effects().add(200,effect)
                                 mMvAudioEffect = effect
@@ -291,7 +292,7 @@ class MVFragment :BaseFragment(FunctionType.MVEffect) {
     }
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
         val videoClip = mVideoItem!!.mVideoClip
         val audioClip = mVideoItem!!.mAudioClip
 
@@ -331,8 +332,8 @@ class MVFragment :BaseFragment(FunctionType.MVEffect) {
 
         mMVPropertyBuilder.holder.begin = mStartTime
         mMVPropertyBuilder.holder.end = mEndTime
-        mMvAudioConfig.setNumber(AudioFileClip.CONFIG_TRIM_START,mStartTime)
-        mMvAudioConfig.setNumber(AudioFileClip.CONFIG_TRIM_DURATION,mEndTime - mStartTime)
+//        mMvAudioConfig.setNumber(AudioFileClip.CONFIG_TRIM_START,mStartTime)
+//        mMvAudioConfig.setNumber(AudioFileClip.CONFIG_TRIM_DURATION,mEndTime - mStartTime)
 
         mMVEffect = Effect(mEditor!!.context,TusdkMVEffect.TYPE_NAME)
 

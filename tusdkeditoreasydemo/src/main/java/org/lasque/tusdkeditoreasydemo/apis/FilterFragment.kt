@@ -218,7 +218,7 @@ public class FilterFragment : BaseFragment(FunctionType.FilterEffect) {
 
     private fun initLayer() {
         val item = mVideoList!![0]
-        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video)
+        mVideoItem = VideoItem.createVideoItem(item.path, mEditor!!, true, item.type == AlbumItemType.Video,item.audioPath)
 
         var videoLayer = ClipLayer(mEditor!!.context, true)
         val videoLayerConfig = Config()
