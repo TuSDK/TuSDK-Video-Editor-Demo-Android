@@ -38,6 +38,9 @@
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".GraffitiActivity" />
         <activity android:name=".MosaicActivity" />
+        <activity android:name=".VoiceToTextActivity" />
+        <activity android:name=".VoiceAPIEffectActivity" />
+        <activity android:name=".MatteActivity" />
     </application>
     <uses-feature android:name="android.hardware.camera" /> <!-- 允许应用程序写数据到外部存储设备（主要是SD卡） -->
     <uses-feature android:name="android.hardware.camera.autofocus" />

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/lsq_editor_panel_bg"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="gone"
+        android:translationZ="40dp"
+        android:alpha="0.95"
+        android:background="@color/lsq_editor_panel_bg"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/lsq_loading_mask"
+        android:layout_width="0dp"
+        android:layout_height="0dp">
+
+        <TextView
+            android:textSize="24sp"
+            android:text="生成中...."
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:id="@+id/lsq_loading_mask_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <include
+        android:id="@+id/lsq_title_layer"
+        layout="@layout/include_title_layer"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:text="文字内容 : "
+        android:textColor="@color/white"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_title_layer"
+        android:id="@+id/lsq_voice_to_text_edit_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:inputType="text"
+        android:maxLength="20"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_voice_to_text_edit_title"
+        app:layout_constraintLeft_toLeftOf="@id/lsq_voice_to_text_edit_title"
+        android:id="@+id/lsq_voice_to_text_edit"
+        android:background="@color/white"
+        android:layout_width="0dp"
+        android:layout_height="80dp"/>
+
+    <TextView
+        android:textColor="@color/white"
+        android:text="音色类型 : "
+        android:layout_marginTop="40dp"
+        app:layout_constraintLeft_toLeftOf="@id/lsq_voice_to_text_edit"
+        app:layout_constraintTop_toBottomOf="@id/lsq_voice_to_text_edit"
+        android:id="@+id/lsq_voice_to_text_type_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lsq_voice_to_text_type_layer"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lsq_voice_to_text_type_title"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="0dp"
+        android:layout_height="100dp">
+
+        <TextView
+            android:id="@+id/lsq_voice_to_text_type_man"
+            android:text="男神"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/lsq_color_red"
+            android:background="@drawable/voice_to_text_type_select_bg"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <TextView
+            android:id="@+id/lsq_voice_to_text_type_girl"
+            android:text="女童"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/black"
+            android:background="@color/white"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <TextView
+            app:layout_constraintLeft_toRightOf="@id/lsq_voice_to_text_type_woman"
+            android:id="@+id/lsq_voice_to_text_type_boy"
+            app:layout_constraintRight_toLeftOf="@id/lsq_voice_to_text_type_girl"
+            android:text="男童"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/black"
+            android:background="@color/white"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <TextView
+            app:layout_constraintRight_toLeftOf="@id/lsq_voice_to_text_type_boy"
+            app:layout_constraintLeft_toRightOf="@id/lsq_voice_to_text_type_man"
+            android:id="@+id/lsq_voice_to_text_type_woman"
+            android:text="女神"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/black"
+            android:background="@color/white"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <TextView
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/lsq_voice_to_text_type_xiao_xin"
+            android:text="小新"
+            android:gravity="center"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/black"
+            android:background="@color/white"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <TextView
+            android:id="@+id/lsq_voice_to_text_type_psyduck"
+            app:layout_constraintBottom_toBottomOf="@id/lsq_voice_to_text_type_xiao_xin"
+            android:text="可达鸭"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="@id/lsq_voice_to_text_type_xiao_xin"
+            app:layout_constraintLeft_toLeftOf="@id/lsq_voice_to_text_type_woman"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/black"
+            android:background="@color/white"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <TextView
+            android:text="Siri"
+            android:gravity="center"
+            android:id="@+id/lsq_voice_to_text_type_siri"
+            app:layout_constraintBottom_toBottomOf="@id/lsq_voice_to_text_type_xiao_xin"
+            app:layout_constraintTop_toTopOf="@id/lsq_voice_to_text_type_xiao_xin"
+            app:layout_constraintLeft_toLeftOf="@id/lsq_voice_to_text_type_boy"
+            app:layout_constraintWidth_percent="0.22"
+            android:textColor="@color/black"
+            android:background="@color/white"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintHeight_percent="0.45"
+            app:layout_constraintHeight_default="percent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:background="@drawable/voice_to_text_commit_bg"
+        android:text="生成"
+        android:textColor="@color/white"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="40dp"
+        app:layout_constraintTop_toBottomOf="@id/lsq_voice_to_text_type_layer"
+        android:id="@+id/lsq_voice_to_text_commit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:visibility="gone"
+        android:background="@drawable/voice_to_text_play_bg"
+        android:text="试听"
+        android:textColor="@color/black"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="40dp"
+        app:layout_constraintTop_toBottomOf="@id/lsq_voice_to_text_commit"
+        android:id="@+id/lsq_voice_to_text_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

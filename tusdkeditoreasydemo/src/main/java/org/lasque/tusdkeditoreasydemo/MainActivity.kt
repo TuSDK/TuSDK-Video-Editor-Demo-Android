@@ -5,8 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.PermissionChecker
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.tusdk.pulse.Engine
+import com.tusdk.pulse.PermissionManager
 import com.tusdk.pulse.editor.TuVideoClipSDK
 import com.tusdk.pulse.utils.AssetsMapper
 import kotlinx.android.synthetic.main.activity_main.*
@@ -24,43 +26,49 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
-    private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_WIFI_STATE)
+    private val PERMISSIONS_STORAGE = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_PHONE_STATE,
+        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_WIFI_STATE
+    )
 
     private val FunctionList = mutableListOf<FunctionType>(
-            FunctionType.MoiveCut,
-            FunctionType.VideoSegmentation,
-            FunctionType.VideoStitching,
-            FunctionType.VideoImageStitching,
-            FunctionType.ImageStitching,
-            FunctionType.VideoAudioMix,
-            FunctionType.ReverseEffect,
-            FunctionType.SlowEffect,
-            FunctionType.RepeatEffect,
-            FunctionType.VideoRatio,
-            FunctionType.Cover,
-            FunctionType.Speed,
-            FunctionType.PictureInPicture,
-            FunctionType.Crop,
-            FunctionType.ColorAdjust,
-            FunctionType.AudioMix,
-            FunctionType.Transform,
-            FunctionType.CanvasBackgroundType,
-            FunctionType.FilterEffect,
-            FunctionType.MVEffect,
-            FunctionType.AudioPitch,
-            FunctionType.TransitionsEffect,
-            FunctionType.SceneEffect,
-            FunctionType.ParticleEffect,
-            FunctionType.Text,
-            FunctionType.Bubble,
-            FunctionType.Graffiti,
-            FunctionType.Freeze,
-            FunctionType.Mosaic,
-            FunctionType.DraftList
+        FunctionType.MoiveCut,
+        FunctionType.VideoSegmentation,
+        FunctionType.VideoStitching,
+        FunctionType.VideoImageStitching,
+        FunctionType.ImageStitching,
+        FunctionType.VideoAudioMix,
+        FunctionType.ReverseEffect,
+        FunctionType.SlowEffect,
+        FunctionType.RepeatEffect,
+        FunctionType.VideoRatio,
+        FunctionType.Cover,
+        FunctionType.Speed,
+        FunctionType.PictureInPicture,
+        FunctionType.Crop,
+        FunctionType.ColorAdjust,
+        FunctionType.AudioMix,
+        FunctionType.AudioFade,
+        FunctionType.Transform,
+        FunctionType.CanvasBackgroundType,
+        FunctionType.FilterEffect,
+        FunctionType.MVEffect,
+        FunctionType.VoiceToText,
+        FunctionType.VoiceVC,
+        FunctionType.AudioPitch,
+        FunctionType.TransitionsEffect,
+        FunctionType.SceneEffect,
+        FunctionType.ParticleEffect,
+        FunctionType.Text,
+        FunctionType.Bubble,
+        FunctionType.Graffiti,
+        FunctionType.Freeze,
+        FunctionType.Mosaic,
+        FunctionType.Matte,
+        FunctionType.DraftList
     )
 
 
@@ -72,51 +80,67 @@ class MainActivity : AppCompatActivity() {
 
         val versionCode = TuVideoClipSDK.SDK_VERSION
 
-        lsq_copyright_info.setText("TuSDK Video Editor SDK ${versionCode}-${TuVideoClipSDK.BUILD_VERSION} \n" +
-                " © 2020 TUTUCLOUD.COM")
+        lsq_copyright_info.setText(
+            "TuSDK Video Editor SDK ${versionCode}-${TuVideoClipSDK.BUILD_VERSION} \n" +
+                    " © 2020 TUTUCLOUD.COM"
+        )
 
-        val sp = getSharedPreferences("TU-TTF",Context.MODE_PRIVATE)
-        if (!sp.contains(Constants.TTF_KEY)){
+        val sp = getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
+        if (!sp.contains(Constants.TTF_KEY)) {
             val assetsMapper = AssetsMapper(this)
             val path = assetsMapper.mapAsset("SourceHanSansSC-Normal.ttf")
-            sp.edit().putString(Constants.TTF_KEY,path).apply()
+            sp.edit().putString(Constants.TTF_KEY, path).apply()
         }
 
-        val ttfPath = sp.getString(Constants.TTF_KEY,"")
-        if (!TextUtils.isEmpty(ttfPath)){
+        val ttfPath = sp.getString(Constants.TTF_KEY, "")
+        if (!TextUtils.isEmpty(ttfPath)) {
             val ttfFile = File(ttfPath)
-            if (!ttfFile.exists()){
+            if (!ttfFile.exists()) {
                 val assetsMapper = AssetsMapper(this)
                 val path = assetsMapper.mapAsset("SourceHanSansSC-Normal.ttf")
-                sp.edit().putString(Constants.TTF_KEY,path).apply()
+                sp.edit().putString(Constants.TTF_KEY, path).apply()
             }
         }
 
 
         val adapter = ApiAdapter(FunctionList, this)
-        adapter.setOnItemClickListener(object : OnItemClickListener<FunctionType, ApiAdapter.ApiViewHolder> {
-            override fun onItemClick(pos: Int, holder: ApiAdapter.ApiViewHolder, item: FunctionType) {
+        adapter.setOnItemClickListener(object :
+            OnItemClickListener<FunctionType, ApiAdapter.ApiViewHolder> {
+            override fun onItemClick(
+                pos: Int,
+                holder: ApiAdapter.ApiViewHolder,
+                item: FunctionType
+            ) {
                 when (item) {
                     FunctionType.ParticleEffect -> {
                         startActivity<ParticleActivity>()
                     }
-                    FunctionType.PictureInPicture->{
+                    FunctionType.PictureInPicture -> {
                         startActivity<ImageStickerActivity>("FunctionType" to FunctionType.PictureInPicture)
                     }
                     FunctionType.Text -> {
                         startActivity<TextStickerActivity>()
                     }
-                    FunctionType.DraftList->{
+                    FunctionType.DraftList -> {
                         startActivity<DraftActivity>()
                     }
-                    FunctionType.Bubble->{
+                    FunctionType.Bubble -> {
                         startActivity<BubbleTextActivity>()
                     }
-                    FunctionType.Graffiti->{
+                    FunctionType.Graffiti -> {
                         startActivity<GraffitiActivity>()
                     }
-                    FunctionType.Mosaic->{
+                    FunctionType.Mosaic -> {
                         startActivity<MosaicActivity>()
+                    }
+                    FunctionType.VoiceToText->{
+                        startActivity<VoiceToTextActivity>()
+                    }
+                    FunctionType.VoiceVC->{
+                        startActivity<VoiceAPIEffectActivity>()
+                    }
+                    FunctionType.Matte->{
+                        startActivity<MatteActivity>()
                     }
                     else -> {
                         startActivity<ApiActivity>("function" to item)
@@ -128,7 +152,6 @@ class MainActivity : AppCompatActivity() {
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         lsq_api_list.layoutManager = layoutManager
         lsq_api_list.adapter = adapter
-
 
 
         val mEngine = Engine.getInstance()
@@ -151,9 +174,9 @@ class MainActivity : AppCompatActivity() {
                 val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
                 sp.edit().putString(Constants.BUBBLE_5, path).apply()
             } else {
-                val path = sp.getString(Constants.BUBBLE_5,"")
+                val path = sp.getString(Constants.BUBBLE_5, "")
                 val file = File(path)
-                if (TextUtils.isEmpty(path) || !file.exists()){
+                if (TextUtils.isEmpty(path) || !file.exists()) {
                     val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
                     sp.edit().putString(Constants.BUBBLE_5, path).apply()
                 }
@@ -162,9 +185,9 @@ class MainActivity : AppCompatActivity() {
                 val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
                 sp.edit().putString(Constants.BUBBLE_6, path).apply()
             } else {
-                val path = sp.getString(Constants.BUBBLE_6,"")
+                val path = sp.getString(Constants.BUBBLE_6, "")
                 val file = File(path)
-                if (TextUtils.isEmpty(path) || !file.exists()){
+                if (TextUtils.isEmpty(path) || !file.exists()) {
                     val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
                     sp.edit().putString(Constants.BUBBLE_6, path).apply()
                 }
@@ -173,9 +196,9 @@ class MainActivity : AppCompatActivity() {
                 val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
                 sp.edit().putString(Constants.BUBBLE_7, path).apply()
             } else {
-                val path = sp.getString(Constants.BUBBLE_7,"")
+                val path = sp.getString(Constants.BUBBLE_7, "")
                 val file = File(path)
-                if (TextUtils.isEmpty(path) || !file.exists()){
+                if (TextUtils.isEmpty(path) || !file.exists()) {
                     val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
                     sp.edit().putString(Constants.BUBBLE_7, path).apply()
                 }
@@ -190,43 +213,56 @@ class MainActivity : AppCompatActivity() {
      * @param permissionGranted
      * true or false, 用户是否授予相应权限
      */
-    protected var mGrantedResultDelgate: PermissionUtils.GrantedResultDelgate = object : PermissionUtils.GrantedResultDelgate {
-        override fun onPermissionGrantedResult(permissionGranted: Boolean) {
-            if (permissionGranted) {
-                ThreadHelper.runThread {
-                    val sp = TuSdkContext.context().getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
-                    val assetsMapper = AssetsMapper(TuSdkContext.context())
-                    if (!sp.contains(Constants.BUBBLE_TTF_KEY)) {
-                        assetsMapper.mapAsset("AliHYAiHei.ttf")
-                        assetsMapper.mapAsset("NotoColorEmoji.ttf")
-                        assetsMapper.mapAsset("SOURCEHANSANSCN-LIGHT.OTF")
-                        assetsMapper.mapAsset("SOURCEHANSANSCN-REGULAR.OTF")
-                        assetsMapper.mapAsset("站酷快乐体2016修订版_0.ttf")
-                        val path = TuSdkContext.context().externalCacheDirs[0].absolutePath + "/assets"
-                        sp.edit().putString(Constants.BUBBLE_TTF_KEY, path).apply()
+    protected var mGrantedResultDelgate: PermissionUtils.GrantedResultDelgate =
+        object : PermissionUtils.GrantedResultDelgate {
+            override fun onPermissionGrantedResult(permissionGranted: Boolean) {
+                if (permissionGranted) {
+                    ThreadHelper.runThread {
+                        val sp = TuSdkContext.context()
+                            .getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
+                        val assetsMapper = AssetsMapper(TuSdkContext.context())
+                        if (!sp.contains(Constants.BUBBLE_TTF_KEY)) {
+                            assetsMapper.mapAsset("AliHYAiHei.ttf")
+                            assetsMapper.mapAsset("NotoColorEmoji.ttf")
+                            assetsMapper.mapAsset("SOURCEHANSANSCN-LIGHT.OTF")
+                            assetsMapper.mapAsset("SOURCEHANSANSCN-REGULAR.OTF")
+                            assetsMapper.mapAsset("站酷快乐体2016修订版_0.ttf")
+                            val path =
+                                TuSdkContext.context().externalCacheDirs[0].absolutePath + "/assets"
+                            sp.edit().putString(Constants.BUBBLE_TTF_KEY, path).apply()
+                        }
+                        if (!sp.contains(Constants.BUBBLE_5)) {
+                            val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
+                            sp.edit().putString(Constants.BUBBLE_5, path).apply()
+                        }
+                        if (!sp.contains(Constants.BUBBLE_6)) {
+                            val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
+                            sp.edit().putString(Constants.BUBBLE_6, path).apply()
+                        }
+                        if (!sp.contains(Constants.BUBBLE_7)) {
+                            val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
+                            sp.edit().putString(Constants.BUBBLE_7, path).apply()
+                        }
                     }
-                    if (!sp.contains(Constants.BUBBLE_5)) {
-                        val path = assetsMapper.mapAsset("bubbles/lsq_bubble_5.bt")
-                        sp.edit().putString(Constants.BUBBLE_5, path).apply()
-                    }
-                    if (!sp.contains(Constants.BUBBLE_6)) {
-                        val path = assetsMapper.mapAsset("bubbles/lsq_bubble_6.bt")
-                        sp.edit().putString(Constants.BUBBLE_6, path).apply()
-                    }
-                    if (!sp.contains(Constants.BUBBLE_7)) {
-                        val path = assetsMapper.mapAsset("bubbles/lsq_bubble_7.bt")
-                        sp.edit().putString(Constants.BUBBLE_7, path).apply()
-                    }
-                }
-            } else {
+                } else {
 
+                }
             }
         }
-    }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        PermissionUtils.handleRequestPermissionsResult(requestCode, permissions, grantResults, this, mGrantedResultDelgate)
+        PermissionUtils.handleRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults,
+            this,
+            mGrantedResultDelgate
+        )
     }
 
     override fun onDestroy() {

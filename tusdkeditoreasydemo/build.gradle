@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "org.lasque.tusdkeditordemo"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -69,6 +69,12 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
 
     implementation 'com.github.Jay-Goo:RangeSeekBar:v3.0.0'
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+
+    implementation 'com.google.code.gson:gson:2.8.7'
+
+    implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
 
 
 

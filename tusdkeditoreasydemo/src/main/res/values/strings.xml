@@ -10,6 +10,7 @@
 
     <string name="lsq_function_video_audio_mix">音视频混合</string>
     <string name="lsq_function_audio_mix">多音轨混合</string>
+    <string name="lsq_function_audio_fade">音乐淡化</string>
 
     <string name="lsq_function_video_filter_effect">滤镜特效</string>
     <string name="lsq_function_video_mv_effect">MV特效</string>
@@ -38,6 +39,9 @@
     <string name="lsq_function_graffiti">涂鸦</string>
     <string name="lsq_function_freeze">视频定格</string>
     <string name="lsq_function_mosaic">马赛克</string>
+    <string name="lsq_function_matte">视频蒙版</string>
+    <string name="lsq_function_voice_to_text">文字转语音</string>
+    <string name="lsq_function_voice_vc_api">音色转换</string>
 
     <!-- 混合模式 -->
     <string name="lsq_filter_normal">正常</string>
@@ -375,6 +379,16 @@
     <string name="lsq_anitext_name_81">摇荡</string>
     <string name="lsq_anitext_name_82">颤抖</string>
     <string name="lsq_anitext_name_83">跳动</string>
+
+
+    <!-- 视频蒙版 -->
+    <string name="lsq_matte_none">无</string>
+    <string name="lsq_matte_linear">线性</string>
+    <string name="lsq_matte_mirror">镜像</string>
+    <string name="lsq_matte_radial">圆形</string>
+    <string name="lsq_matte_rect">矩形</string>
+    <string name="lsq_matte_heart">心形</string>
+    <string name="lsq_matte_star">星星</string>
 
 
 

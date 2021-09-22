@@ -87,6 +87,9 @@ class DraftActivity : BaseActivity() {
                         FunctionType.Mosaic->{
                             startActivity<MosaicActivity>(DraftItem.Draft_Path_Key to item.draftPath)
                         }
+                        FunctionType.Matte->{
+                            startActivity<MatteActivity>(DraftItem.Draft_Path_Key to item.draftPath)
+                        }
                         else -> {
                             startActivity<ApiActivity>("function" to functionType,DraftItem.Draft_Path_Key to item.draftPath)
                         }

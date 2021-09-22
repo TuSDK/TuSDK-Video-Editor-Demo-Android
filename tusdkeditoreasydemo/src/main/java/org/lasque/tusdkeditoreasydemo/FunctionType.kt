@@ -19,6 +19,7 @@ enum class FunctionType(titleId : Int) {
     ImageStitching(R.string.lsq_function_image_stitcing),
     VideoAudioMix(R.string.lsq_function_video_audio_mix),
     AudioMix(R.string.lsq_function_audio_mix),
+    AudioFade(R.string.lsq_function_audio_fade),
     FilterEffect(R.string.lsq_function_video_filter_effect),
     MVEffect(R.string.lsq_function_video_mv_effect),
     SceneEffect(R.string.lsq_function_video_scene_effect),
@@ -46,7 +47,10 @@ enum class FunctionType(titleId : Int) {
     AudioPitch(R.string.lsq_function_audio_patch),
     Graffiti(R.string.lsq_function_graffiti),
     Freeze(R.string.lsq_function_freeze),
-    Mosaic(R.string.lsq_function_mosaic)
+    Mosaic(R.string.lsq_function_mosaic),
+    Matte(R.string.lsq_function_matte),
+    VoiceToText(R.string.lsq_function_voice_to_text),
+    VoiceVC(R.string.lsq_function_voice_vc_api)
     ;
 
     val mTitleId : Int = titleId

@@ -214,6 +214,9 @@ class ApiActivity : BaseActivity() {
             FunctionType.Freeze->{
                 mCurrentFragment = FreezeFragment()
             }
+            FunctionType.AudioFade->{
+                mCurrentFragment = AudioFadeFragment()
+            }
         }
         mCurrentFragment?.setCurrentThreadPool(mEvaThreadPool)
         mCurrentFragment?.setVideoEditor(mEditor)
@@ -355,6 +358,9 @@ class ApiActivity : BaseActivity() {
                 }
                 FunctionType.Freeze->{
                     openAlbum(1, false, true)
+                }
+                FunctionType.AudioFade->{
+                    openAlbum(1,false,true)
                 }
             }
         } else {
