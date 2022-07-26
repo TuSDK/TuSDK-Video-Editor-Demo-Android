@@ -246,10 +246,12 @@ public class BubbleTextActivity : BaseActivity(){
                 }
 
                 runOnUiThread {
-                    Collections.sort(textLayers)
-                    LayerItemViewBase.CURRENT_LAYER_ID = textLayers.last() + 1
-                    for (i in textLayers) {
-                        lsq_sticker_view.restoreBubble(i.toLong())
+                    if (textLayers.isNotEmpty()){
+                        Collections.sort(textLayers)
+                        LayerItemViewBase.CURRENT_LAYER_ID = textLayers.last() + 1
+                        for (i in textLayers) {
+                            lsq_sticker_view.restoreBubble(i.toLong())
+                        }
                     }
                 }
 

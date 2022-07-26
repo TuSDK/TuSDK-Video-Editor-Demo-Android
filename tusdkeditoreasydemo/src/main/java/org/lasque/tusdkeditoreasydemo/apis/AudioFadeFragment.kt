@@ -96,7 +96,7 @@ class AudioFadeFragment : BaseFragment(FunctionType.AudioFade){
                         mThreadPool?.execute {
                             mAudioFadeEffectConfig.setNumber(AudioFadeEffect.CONFIG_FADE_IN_DURATION,mFadeInDuration)
                             mAudioFadeEffectConfig.setNumber(AudioFadeEffect.CONFIG_FADE_OUT_DURATION,mFadeOutDuration)
-
+                            mOnPlayerStateUpdateListener?.onPlayerPause()
                             playerLock()
                             mAudioFadeEffect?.setConfig(mAudioFadeEffectConfig)
                             refreshEditor()

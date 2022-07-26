@@ -75,10 +75,10 @@ class CoverFragment : BaseFragment(FunctionType.Cover) {
 
         mThumbnailMaker = ThumbnailMaker(mVideoItem!!.path, 400)
 
-        val duration = mVideoItem!!.mVideoClip.streamInfo.duration
+        val duration = mVideoItem!!.mVideoClip.originStreamInfo.duration
 
         runOnUiThread {
-            lsq_start_bar.max = duration.toInt()
+            lsq_start_bar.max = duration.toInt() - 100
         }
 
         val videoLayer = ClipLayer(mEditor!!.context,true)

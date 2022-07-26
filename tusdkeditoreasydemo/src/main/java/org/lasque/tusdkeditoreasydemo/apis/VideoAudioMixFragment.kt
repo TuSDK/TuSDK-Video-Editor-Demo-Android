@@ -179,6 +179,7 @@ class VideoAudioMixFragment : BaseFragment(FunctionType.VideoAudioMix) {
 
                     override fun onStopTrackingTouch(p0: SeekBar?) {
                         mThreadPool?.execute {
+                            mOnPlayerStateUpdateListener?.onPlayerPause()
                             playerLock()
                             mSubConfig!!.setNumber(Layer.CONFIG_START_POS,mCurrentMainPos)
                             mSubAudioLayer!!.setConfig(mSubConfig)
@@ -266,7 +267,7 @@ class VideoAudioMixFragment : BaseFragment(FunctionType.VideoAudioMix) {
 
         val subAudioClip = subAudioLayer.getClip(1)
 
-        val duration = mainAudioClip.streamInfo.duration
+        val duration = mainAudioClip.originStreamInfo.duration
 
         val subAudioPath = subAudioClip.config.getString(AudioFileClip.CONFIG_PATH)
         val subDuration = MediaInspector.shared().inspect(subAudioPath).streams[0].duration
@@ -284,7 +285,7 @@ class VideoAudioMixFragment : BaseFragment(FunctionType.VideoAudioMix) {
         mSubClip = subAudioClip
         mVideoClip = videoClip
 
-        mMainAudioDuration = duration
+        mMainAudioDuration = duration - 100
 
         mSubAudioDuration = subDuration
 
@@ -309,7 +310,7 @@ class VideoAudioMixFragment : BaseFragment(FunctionType.VideoAudioMix) {
         val item = mVideoList!![0]
         mVideoItem = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)
 
-        val duration = mVideoItem!!.mAudioClip!!.streamInfo.duration
+        val duration = mVideoItem!!.mVideoClip!!.originStreamInfo.duration
 
         val context = mEditor!!.context
         val videoLayer = ClipLayer(context,true)

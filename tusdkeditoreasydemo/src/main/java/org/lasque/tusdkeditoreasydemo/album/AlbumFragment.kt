@@ -159,7 +159,7 @@ class AlbumFragment : Fragment(), LoadTaskDelegate {
                     val mediaInfo = MediaInspector.shared().inspect(path)
                     for (index in mediaInfo.streams){
                         if (index is MediaInspector.MediaInfo.Video){
-                            if (!index.directReverse){
+                            if (false){
 
                                 val pathCache = requireContext().getSharedPreferences("path-cache",Context.MODE_PRIVATE)
 

@@ -202,6 +202,7 @@ public class ImageStitchingFragment : BaseFragment(FunctionType.ImageStitching) 
 
     public fun addVideolist(list: MutableList<AlbumInfo>){
         mVideoList!!.addAll(list)
+        mOnPlayerStateUpdateListener?.onPlayerPause()
         playerLock()
         for (item in list){
             val clip = VideoItem.createVideoItem(item.path,mEditor!!,true,item.type == AlbumItemType.Video,item.audioPath)

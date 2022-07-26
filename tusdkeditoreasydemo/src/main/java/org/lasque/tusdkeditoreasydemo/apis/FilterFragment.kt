@@ -153,6 +153,7 @@ public class FilterFragment : BaseFragment(FunctionType.FilterEffect) {
                     mThreadPool?.execute {
                         val currentState = mPlayerContext!!.state
                         val currentFrame = mPlayerContext!!.currentFrame
+                        mOnPlayerStateUpdateListener?.onPlayerPause()
                         playerLock()
                         mVideoClip!!.effects().delete(120)
                         refreshEditor()

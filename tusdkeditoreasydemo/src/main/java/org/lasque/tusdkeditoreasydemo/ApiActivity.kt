@@ -217,6 +217,9 @@ class ApiActivity : BaseActivity() {
             FunctionType.AudioFade->{
                 mCurrentFragment = AudioFadeFragment()
             }
+            FunctionType.GIF->{
+                mCurrentFragment = GifFragment()
+            }
         }
         mCurrentFragment?.setCurrentThreadPool(mEvaThreadPool)
         mCurrentFragment?.setVideoEditor(mEditor)
@@ -302,7 +305,7 @@ class ApiActivity : BaseActivity() {
                     openAlbum(-1, true, false)
                 }
                 FunctionType.VideoAudioMix -> {
-                    openAlbum(1, false, false)
+                    openAlbum(1, false, true)
                 }
                 FunctionType.FilterEffect -> {
                     openAlbum(1, false, false)
@@ -361,6 +364,9 @@ class ApiActivity : BaseActivity() {
                 }
                 FunctionType.AudioFade->{
                     openAlbum(1,false,true)
+                }
+                FunctionType.GIF->{
+                    initFragment()
                 }
             }
         } else {
@@ -562,10 +568,7 @@ class ApiActivity : BaseActivity() {
                     override fun onStopTrackingTouch(p0: SeekBar?) {
                         isSeekBarTouch = false
 //                        mEvaThreadPool.execute {
-//                            mPlayer?.play()
-//                            runOnUiThread {
-//                                lsq_editor_play.visibility = View.GONE
-//                            }
+//                            playerPlay()
 //                        }
                     }
                 })

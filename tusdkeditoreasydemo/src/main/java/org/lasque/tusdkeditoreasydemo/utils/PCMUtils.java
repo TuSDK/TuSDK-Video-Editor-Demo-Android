@@ -1,7 +1,5 @@
 package org.lasque.tusdkeditoreasydemo.utils;
 
-import com.arthenica.mobileffmpeg.FFmpeg;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -80,26 +78,5 @@ public class PCMUtils {
             b[i] = a[b.length - i - 1];
         }
         return b;
-    }
-    
-    public static void pcmToMp3(File pcm,File mp3){
-        try {
-            String command = "-y -f s16be -ac 1 -ar 22050 -acodec pcm_s16le -i "+pcm.getCanonicalPath()+" "+mp3.getCanonicalPath()+"";
-            FFmpeg.execute(command);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public static void mp3ToPcm(File mp3,File outputPcm){
-        try {
-            String c = String.format(Locale.ENGLISH,
-                    "-y -i %s -acodec pcm_s16le -f s16le -ac 1 -ar 22050 %s",
-                    mp3.getCanonicalPath(),outputPcm.getCanonicalPath()
-                    );
-            FFmpeg.execute(c);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

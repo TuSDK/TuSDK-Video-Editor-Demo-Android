@@ -44,6 +44,8 @@ public class Constants {
 
     public static String BUBBLE_TTF_KEY = "BUBBLE-TTF-Path";
 
+    public static String TEXT_TTF_LIST = "FONT-LIST";
+
     public static String BUBBLE_5 = "Bubble_5";
     public static String BUBBLE_6 = "Bubble_6";
     public static String BUBBLE_7 = "Bubble_7";

@@ -42,6 +42,7 @@
     <string name="lsq_function_matte">视频蒙版</string>
     <string name="lsq_function_voice_to_text">文字转语音</string>
     <string name="lsq_function_voice_vc_api">音色转换</string>
+    <string name="lsq_function_gif">GIF图渲染</string>
 
     <!-- 混合模式 -->
     <string name="lsq_filter_normal">正常</string>

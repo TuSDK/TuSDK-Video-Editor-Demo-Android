@@ -7,6 +7,7 @@ import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import com.tusdk.pulse.Engine
 import com.tusdk.pulse.PermissionManager
 import com.tusdk.pulse.editor.TuVideoClipSDK
@@ -23,6 +24,7 @@ import org.lasque.tusdkpulse.core.utils.TLog
 import org.lasque.tusdkpulse.core.utils.ThreadHelper
 import org.lasque.tusdkpulse.core.view.TuSdkViewHelper
 import java.io.File
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,8 +58,6 @@ class MainActivity : AppCompatActivity() {
         FunctionType.CanvasBackgroundType,
         FunctionType.FilterEffect,
         FunctionType.MVEffect,
-        FunctionType.VoiceToText,
-        FunctionType.VoiceVC,
         FunctionType.AudioPitch,
         FunctionType.TransitionsEffect,
         FunctionType.SceneEffect,
@@ -68,7 +68,8 @@ class MainActivity : AppCompatActivity() {
         FunctionType.Freeze,
         FunctionType.Mosaic,
         FunctionType.Matte,
-        FunctionType.DraftList
+        FunctionType.DraftList,
+        FunctionType.GIF
     )
 
 
@@ -88,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         val sp = getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
         if (!sp.contains(Constants.TTF_KEY)) {
             val assetsMapper = AssetsMapper(this)
-            val path = assetsMapper.mapAsset("SourceHanSansSC-Normal.ttf")
+            val path = assetsMapper.mapAsset("Coiny-Regular.ttf")
             sp.edit().putString(Constants.TTF_KEY, path).apply()
         }
 
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             val ttfFile = File(ttfPath)
             if (!ttfFile.exists()) {
                 val assetsMapper = AssetsMapper(this)
-                val path = assetsMapper.mapAsset("SourceHanSansSC-Normal.ttf")
+                val path = assetsMapper.mapAsset("Coiny-Regular.ttf")
                 sp.edit().putString(Constants.TTF_KEY, path).apply()
             }
         }
@@ -162,12 +163,25 @@ class MainActivity : AppCompatActivity() {
             val sp = TuSdkContext.context().getSharedPreferences("TU-TTF", Context.MODE_PRIVATE)
             val assetsMapper = AssetsMapper(TuSdkContext.context())
             if (!sp.contains(Constants.BUBBLE_TTF_KEY)) {
-                assetsMapper.mapAsset("AliHYAiHei.ttf")
-                assetsMapper.mapAsset("NotoColorEmoji.ttf")
-                assetsMapper.mapAsset("SOURCEHANSANSCN-LIGHT.OTF")
-                assetsMapper.mapAsset("SOURCEHANSANSCN-REGULAR.OTF")
-                assetsMapper.mapAsset("站酷快乐体2016修订版_0.ttf")
+                val gson = Gson()
+                val fontPathsList = Arrays.asList(
+                    assetsMapper.mapAsset("AliHYAiHei.ttf"),
+                    assetsMapper.mapAsset("NotoColorEmoji.ttf"),
+                    assetsMapper.mapAsset("SOURCEHANSANSCN-LIGHT.OTF"),
+                    assetsMapper.mapAsset("SOURCEHANSANSCN-REGULAR.OTF"),
+                    assetsMapper.mapAsset("站酷快乐体2016修订版_0.ttf")
+                )
                 val path = TuSdkContext.context().externalCacheDirs[0].absolutePath + "/assets"
+
+                val stringBuilder = StringBuilder()
+
+                for (s in fontPathsList){
+                    stringBuilder.append(s).append(",")
+                }
+
+                val fontJson = stringBuilder.toString()
+                sp.edit().putString(Constants.TEXT_TTF_LIST,fontJson).apply()
+
                 sp.edit().putString(Constants.BUBBLE_TTF_KEY, path).apply()
             }
             if (!sp.contains(Constants.BUBBLE_5)) {

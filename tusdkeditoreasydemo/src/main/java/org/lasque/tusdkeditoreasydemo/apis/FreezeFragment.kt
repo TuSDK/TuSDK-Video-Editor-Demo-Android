@@ -215,7 +215,7 @@ public class FreezeFragment : BaseFragment(FunctionType.Freeze) {
 
     private fun setFreeze(freezePos : Long,freezeDuration : Long){
         val res = mThreadPool!!.submit(Callable<Boolean>() {
-
+            mOnPlayerStateUpdateListener?.onPlayerPause()
             playerLock()
 
             if (mVideoFreezeEffect == null){

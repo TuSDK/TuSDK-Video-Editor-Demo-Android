@@ -47,7 +47,7 @@ public class TuApplication : TuSdkApplication() {
          * @param appkey 应用秘钥 (请前往 http://tusdk.com 申请秘钥)
          */
         TuSdk.setResourcePackageClazz(R::class.java)
-        this.initPreLoader(this.applicationContext, "107c8c5e4486977c-04-ewdjn1")
+        this.initPreLoader(this.applicationContext, "107c8c5e4486977c-04-ewdjn1",null,null)
 
     }
 }

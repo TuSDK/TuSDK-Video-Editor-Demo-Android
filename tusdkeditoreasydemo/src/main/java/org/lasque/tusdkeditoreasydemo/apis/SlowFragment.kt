@@ -161,6 +161,7 @@ class SlowFragment : BaseFragment(FunctionType.SlowEffect) {
 
                     override fun onStopTrackingTouch(p0: SeekBar?) {
                         mThreadPool?.execute {
+                            mOnPlayerStateUpdateListener?.onPlayerPause()
                             playerLock()
                             mVideoSlowEffectConfig.setNumber(VideoStretchEffect.CONFIG_STRETCH,mCurrentStretch)
                             mAudioSlowEffectConfig.setNumber(AudioStretchEffect.CONFIG_STRETCH,mCurrentStretch)

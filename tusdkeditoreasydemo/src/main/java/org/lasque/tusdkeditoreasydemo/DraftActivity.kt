@@ -58,9 +58,9 @@ class DraftActivity : BaseActivity() {
             lsq_particle_list_panel.visibility = View.VISIBLE
             var draftList : MutableList<DraftItem> = gson.fromJson(draftListJson,type)
 
-            draftList.sortedDescending()
+            var sortList = draftList.sortedDescending().toMutableList()
 
-            val draftAdapter = DraftAdapter(draftList,this)
+            val draftAdapter = DraftAdapter(sortList,this)
             draftAdapter.setOnItemClickListener(object : OnItemClickListener<DraftItem, DraftAdapter.DraftViewHolder> {
                 override fun onItemClick(pos: Int, holder: DraftAdapter.DraftViewHolder, item: DraftItem) {
                     when(val functionType = FunctionType.values()[item.funcType]){
@@ -99,17 +99,19 @@ class DraftActivity : BaseActivity() {
 
             draftAdapter.setOnItemDeleteClickListener(object : OnItemDeleteClickListener<DraftItem,DraftAdapter.DraftViewHolder>{
                 override fun onItemDelete(pos: Int, holder: DraftAdapter.DraftViewHolder, item: DraftItem) {
-                    draftList.removeAt(pos)
-                    draftAdapter.updateDraftList(draftList)
+                    TLog.e("target pos ${pos}")
+
+                    sortList.remove(item)
+                    draftAdapter.updateDraftList(sortList)
 
 
-                    if (draftList.isEmpty()){
+                    if (sortList.isEmpty()){
                         lsq_particle_list_panel.visibility = View.GONE
                         lsq_draft_null_slogan.visibility = View.VISIBLE
                         sp.edit().remove(DraftItem.Draft_List_Key).apply()
 
                     } else{
-                        val draftString = gson.toJson(draftList)
+                        val draftString = gson.toJson(sortList)
                         sp.edit().putString(DraftItem.Draft_List_Key,draftString).apply()
                     }
                 }

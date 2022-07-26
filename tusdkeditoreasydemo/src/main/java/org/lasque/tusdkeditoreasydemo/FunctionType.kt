@@ -50,7 +50,8 @@ enum class FunctionType(titleId : Int) {
     Mosaic(R.string.lsq_function_mosaic),
     Matte(R.string.lsq_function_matte),
     VoiceToText(R.string.lsq_function_voice_to_text),
-    VoiceVC(R.string.lsq_function_voice_vc_api)
+    VoiceVC(R.string.lsq_function_voice_vc_api),
+    GIF(R.string.lsq_function_gif),
     ;
 
     val mTitleId : Int = titleId

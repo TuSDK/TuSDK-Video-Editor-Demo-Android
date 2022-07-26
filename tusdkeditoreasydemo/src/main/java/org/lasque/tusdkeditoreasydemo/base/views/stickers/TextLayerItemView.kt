@@ -18,6 +18,7 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.google.gson.Gson
 import com.tusdk.pulse.Config
 import com.tusdk.pulse.VideoStreamInfo
 import com.tusdk.pulse.editor.Clip
@@ -185,7 +186,7 @@ public class TextLayerItemView : LayerItemViewBase {
 
     private var mCurrentString: String = ""
 
-    private val mDefaultString: String = "请输入文字"
+    private val mDefaultString: String = "ssssss"
 
     private var mCurrentInputAnimation : AnimationItem? = null
 
@@ -213,7 +214,12 @@ public class TextLayerItemView : LayerItemViewBase {
     override fun createLayer() {
         super.createLayer()
         //            mTextPropertyBuilder.font = "android_asset://SourceHanSansSC-Normal.ttf"
-        mTextPropertyBuilder.holder.fonts.add(context.getSharedPreferences("TU-TTF",Context.MODE_PRIVATE).getString(Constants.TTF_KEY,""))
+
+        val json = context.getSharedPreferences("TU-TTF",Context.MODE_PRIVATE).getString(Constants.TEXT_TTF_LIST,"")
+        TLog.e("font list json %s",json)
+        val fontList = TextUtils.split(json,",")
+
+        mTextPropertyBuilder.holder.fonts.addAll(fontList)
 
         mTextPropertyBuilder.holder.fillColor = Color.parseColor("#ffffff")
         mTextPropertyBuilder.holder.opacity = 1.0
@@ -248,7 +254,7 @@ public class TextLayerItemView : LayerItemViewBase {
             val parentSize = TuSdkSize.create(mParentRect)
             mMaxScale = parentSize.maxSide().toFloat() / mDefaultViewSize.minSide()
             val pX = posProperty.posX * mParentFrame.width()
-            val pY = posProperty.posY * mParentFrame.width()
+            val pY = posProperty.posY * mParentFrame.height()
             x = (pX - (width / 2f)).toFloat()
             y = (pY - (height / 2f)).toFloat()
             setViewSize(view, width, height)
@@ -279,7 +285,7 @@ public class TextLayerItemView : LayerItemViewBase {
                 mDefaultViewSize = TuSdkSize(width, height)
                 mCHypotenuse = RectHelper.getDistanceOfTwoPoints(0F, 0f, posProperty.width.toFloat(), posProperty.height.toFloat())
                 val pX = posProperty.posX * mParentFrame.width()
-                val pY = posProperty.posY * mParentFrame.width()
+                val pY = posProperty.posY * mParentFrame.height()
                 x = (pX - (width / 2f)).toFloat()
                 y = (pY - (height / 2f)).toFloat()
                 setViewSize(view, width, height)
@@ -373,7 +379,7 @@ public class TextLayerItemView : LayerItemViewBase {
                 val parentSize = TuSdkSize.create(mParentRect)
                 mMaxScale = parentSize.maxSide().toFloat() / mDefaultViewSize.minSide()
                 val pX = posProperty.posX * mParentFrame.width()
-                val pY = posProperty.posY * mParentFrame.width()
+                val pY = posProperty.posY * mParentFrame.height()
                 x = (pX - (width / 2f)).toFloat()
                 y = (pY - (height / 2f)).toFloat()
                 setViewSize(view, width, height)
@@ -676,7 +682,7 @@ public class TextLayerItemView : LayerItemViewBase {
             mDefaultViewSize = TuSdkSize(width,height)
             val scaleSize = mDefaultViewSize
             val pX = posProperty.posX * mParentFrame.width()
-            val pY = posProperty.posY * mParentFrame.width()
+            val pY = posProperty.posY * mParentFrame.height()
             x = (pX - (width / 2f)).toFloat()
             y = (pY - (height / 2f)).toFloat()
             mTranslation.set(x,y)

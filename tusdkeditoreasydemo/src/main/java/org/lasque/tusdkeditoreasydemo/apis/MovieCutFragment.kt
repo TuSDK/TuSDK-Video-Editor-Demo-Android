@@ -96,13 +96,11 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
                 view.lsq_start_bar.setCallBack(object : DoubleHeadedDragonBar.DhdBarCallBack() {
                     override fun getMaxString(value: Int): String {
                         mEndTime = value.toLong()
-                        TLog.e("start : ${mStartTime} end : $mEndTime")
                         return super.getMaxString(value)
                     }
 
                     override fun getMinString(value: Int): String {
                         mStartTime = value.toLong()
-                        TLog.e("start : ${mStartTime} end : $mEndTime")
                         return super.getMinString(value)
                     }
 
@@ -122,6 +120,7 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
                         mEndTime = endTime
                         setCurrentState()
                         mThreadPool?.execute {
+                            mOnPlayerStateUpdateListener?.onPlayerPause()
                             playerLock()
                             mVideoTrimConfig.setNumber(VideoTrimEffect.CONFIG_BEGIN, mStartTime)
                             mVideoTrimConfig.setNumber(VideoTrimEffect.CONFIG_END, mEndTime)
@@ -143,7 +142,6 @@ class MovieCutFragment : BaseFragment(FunctionType.MoiveCut) {
 
                 })
                 view.lsq_start_bar.post {
-                    TLog.e("endPath ${mEndTime} max ${mMaxDuration}")
                     view.lsq_start_bar.minValue = ((mStartTime / mMaxDuration.toDouble()) * 100).toInt()
                     view.lsq_start_bar.maxValue = ((mEndTime / mMaxDuration.toDouble()) * 100).toInt()
                     view.lsq_start_bar.invalidate()

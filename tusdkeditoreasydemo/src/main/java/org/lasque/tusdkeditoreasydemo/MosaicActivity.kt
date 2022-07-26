@@ -339,6 +339,14 @@ class MosaicActivity : BaseActivity() {
                     return
                 }
 
+                var targetPreviewPos = mCurrentStartPos
+
+                if (mCurrentStartPos == startTime){
+                    targetPreviewPos = endTime
+                } else {
+                    targetPreviewPos = startTime
+                }
+
                 mCurrentStartPos = startTime
                 mCurrentEndPos = endTime
 
@@ -355,7 +363,7 @@ class MosaicActivity : BaseActivity() {
                 }
 
                 mThreadPool.execute {
-                    mEditor.player.previewFrame(mCurrentStartPos)
+                    mEditor.player.previewFrame(targetPreviewPos)
                 }
             }
         })
@@ -633,8 +641,6 @@ class MosaicActivity : BaseActivity() {
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     isSeekBarTouch = false
-                    lsq_mosaic_duration.minValue = ((current / mMaxDuration) * 100).toInt()
-                    lsq_mosaic_duration.invalidate()
 
                 }
 

@@ -144,6 +144,7 @@
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginBottom="14dp"
+        android:layout_marginEnd="12dp"
         app:bg_color="@color/lsq_color_api_gray"
         app:button_height="30dp"
         app:button_img="@mipmap/sel_ic"

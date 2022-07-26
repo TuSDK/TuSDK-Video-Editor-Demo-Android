@@ -14,10 +14,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import com.tusdk.pulse.Config
-import com.tusdk.pulse.MediaInspector
-import com.tusdk.pulse.Producer
-import com.tusdk.pulse.Transcoder
+import com.tusdk.pulse.*
 import com.tusdk.pulse.editor.Clip
 import com.tusdk.pulse.editor.ClipLayer
 import com.tusdk.pulse.editor.Effect
@@ -78,6 +75,8 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
 
     private var isReverse = true
 
+    private var mVideoDuration = 0
+
     private val transcoderSemaphore: Semaphore = Semaphore(0)
 
     override fun getLayoutId(): Int {
@@ -108,6 +107,7 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
                             mVideoLayer!!.deleteClip(100)
                             mVideoLayer!!.addClip(100, mVideoClip)
                         } else {
+                            val deleteClip = mVideoLayer!!.deleteClip(100)
                             if (mVideoReverseClip == null) {
                                 checkVideoState()
                                 initReverseClip()
@@ -115,8 +115,8 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
                             runOnUiThread {
                                 lsq_video_reverse.text = "关闭倒播"
                             }
-                            mVideoLayer!!.deleteClip(100)
-                            mVideoLayer!!.addClip(100, mVideoReverseClip)
+                            val addClip = mVideoLayer!!.addClip(100, mVideoReverseClip)
+                            TLog.e("add clip %s delete clip %s",addClip,deleteClip)
                         }
                         refreshEditor()
                         playerUnlock()
@@ -162,6 +162,8 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
         mVideoLayer = videoLayer
         mAudioLayer = audioLayer
 
+        mVideoDuration = mVideoClip!!.streamInfo.duration.toInt()
+
         return true
     }
 
@@ -206,6 +208,8 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
         mAudioClip = audioClip
         mVideoLayer = videoLayer
         mAudioLayer = audioLayer
+
+        mVideoDuration = mVideoClip!!.streamInfo.duration.toInt()
     }
 
     private fun checkVideoState() {
@@ -222,38 +226,52 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
 
     private fun videoTranscoder(inputPath: String): String {
         val outputPath = getOutputTempFilePath().path
-        val transcoder = Transcoder()
-        transcoder.setListener(object : Producer.Listener {
-            override fun onEvent(state: Producer.State?, ts: Long) {
-                if (state == Producer.State.kWRITING) {
-                    val currentDuration = transcoder.duration.toFloat()
-                    runOnUiThread {
-                        lsq_video_reverse.visibility = View.GONE
-                        lsq_editor_cut_load.setVisibility(View.VISIBLE)
-                        lsq_editor_cut_load_parogress.setValue((ts / currentDuration) * 100f)
+        val transcoder = VideoPreprocessor()
+        transcoder.setListener(object : VideoPreprocessor.Listener {
+
+            override fun onEvent(a: VideoPreprocessor.Action?, ts: Long) {
+                when(a){
+                    VideoPreprocessor.Action.OPEN->{
+
                     }
-                } else if (state == Producer.State.kEND) {
-                    transcoderSemaphore.release()
-                    mThreadPool?.execute {
-                        transcoder.release()
+
+                    VideoPreprocessor.Action.CLOSE->{
+//                        transcoderSemaphore.release()
+                        runOnUiThread {
+                            (activity as ApiActivity).setEnable(true)
+                            lsq_video_reverse.visibility = View.VISIBLE
+                            lsq_editor_cut_load.setVisibility(View.GONE)
+                            lsq_editor_cut_load_parogress.setValue(0f)
+                            Toast.makeText(requireContext(), "视频转码结束", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                    runOnUiThread {
-                        (activity as ApiActivity).setEnable(true)
-                        lsq_video_reverse.visibility = View.VISIBLE
-                        lsq_editor_cut_load.setVisibility(View.GONE)
-                        lsq_editor_cut_load_parogress.setValue(0f)
-                        Toast.makeText(requireContext(), "视频转码结束", Toast.LENGTH_SHORT).show()
+
+                    VideoPreprocessor.Action.START->{
+
                     }
+                    VideoPreprocessor.Action.WRITTING->{
+                        val currentDuration = mVideoDuration
+                        runOnUiThread {
+                            lsq_video_reverse.visibility = View.GONE
+                            lsq_editor_cut_load.setVisibility(View.VISIBLE)
+                            lsq_editor_cut_load_parogress.setValue((ts / currentDuration.toFloat()) * 100f)
+                        }
+                    }
+                    VideoPreprocessor.Action.CANCEL->{
+
+                    }
+
+
                 }
             }
 
         })
 
-        val transcoderConfig = Producer.OutputConfig()
-        transcoderConfig.keyint = 0
-        transcoder.setOutputConfig(transcoderConfig)
-
-        if (!transcoder.init(outputPath, inputPath)) {
+        val processerConfig = VideoPreprocessor.Config()
+        processerConfig.inputPath = inputPath
+        processerConfig.outputPath = outputPath
+        processerConfig.keyint = 0
+        if (!transcoder.open(processerConfig)) {
             TLog.e("Transcoder Error")
         }
         transcoder.start()
@@ -262,7 +280,8 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
             toast("视频转码开始")
         }
         setCanBackPressed(false)
-        transcoderSemaphore.acquire()
+//        transcoderSemaphore.acquire()
+        transcoder.close(true)
         return outputPath
     }
 
@@ -298,13 +317,13 @@ class ReverseFragment : BaseFragment(FunctionType.ReverseEffect) {
     override fun onDestroy() {
         super.onDestroy()
 
-//        mThreadPool?.execute {
-//            if (mVideoReverseClip != null){
-//                mVideoReverseClip!!.deactivate()
-//            }
-//            if (mVideoClip != null){
-//                mVideoClip!!.deactivate()
-//            }
-//        }
+        mThreadPool?.execute {
+            if (mVideoReverseClip != null){
+                mVideoReverseClip!!.deactivate()
+            }
+            if (mVideoClip != null){
+                mVideoClip!!.deactivate()
+            }
+        }
     }
 }
